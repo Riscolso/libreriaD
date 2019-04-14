@@ -806,7 +806,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             }
             //Si es un nodo nuevo
             else{
-                timeToDuel();
+                timeToDuel(1);
                 Thread beats = new Thread(beat());
                 beats.start();
                 //Escuchar cada que hay una replica, el primario nunca lo va a iniciar
