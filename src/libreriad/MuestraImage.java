@@ -119,7 +119,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             Thread.sleep(10000);
                         }
                         //Para que no gaste muchos recursos
-                        System.out.println("4");
+                        System.out.println("Hilo de beat apagado");
                         Thread.sleep(50000);
                     }
                 }catch(Exception ex){
@@ -806,7 +806,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             }
             //Si es un nodo nuevo
             else{
-                timeToDuel(1);
+                //El nodo 1 siempre debe estar endendido cuando se inicia un nodo nuevo
+                namae.add(1);
+                timeToDuel();
                 Thread beats = new Thread(beat());
                 beats.start();
                 //Escuchar cada que hay una replica, el primario nunca lo va a iniciar
