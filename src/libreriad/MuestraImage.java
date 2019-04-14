@@ -435,7 +435,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             //Envíar a todos los nodos secuandarios 
             //La primera posición es del principal
             boolean b = true;
-            for(int j=0;j<namae.size();j++){
+            for(int j=elsujeto;j<namae.size();j++){
                 InetAddress dir = InetAddress.getByName(maq+namae.get(j));
                 //Determinar si el nodo esta disponible
                 if(stillAlive(dir)){
@@ -756,7 +756,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                     s.setTimeToLive(5);
                     gpo = InetAddress.getByName("228.1.1.1");
                     s.joinGroup(gpo);//NOs unimos al canal multicast(Aunque seamos el server)
-                    System.out.println("Servidor iniciado ");
+                    System.out.println("Servidor de relojes iniciado ");
 
                     //Recibir peticiones
                     //Datagrama para recibir
@@ -846,16 +846,16 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         //Si esta vacío es la primera vez que aparece el nodo
         namae = cargarLista();
         
+        //Servidor de relojes
+        Thread serverMulticastRelojes = new Thread(servidorRelojes());
+        serverMulticastRelojes.start();
+        
         //Si no hay siguientes
         if(namae.size() == 0){
             //Si es el primerísimo de todos 
             if(name == 1){
                 System.out.println("Estoy solo en el mundo\nHello darkness my old friend");
                 elsujeto = name;
-                //Servidor de relojes
-                //Se usan sockets multicast
-                Thread serverMulticastRelojes = new Thread(servidorRelojes());
-                serverMulticastRelojes.start();
 
                 //Código para las peticiones
                 btnReIni.setVisible(true);

@@ -38,6 +38,7 @@ public class RelojUsuario extends javax.swing.JFrame {
         //Obtener el número del coordiandor
         try {
             if(fe.buscarElSujeto() == -1) System.out.println("No hay coordinadores activos ");
+            else System.out.println("El coordinador principal es " +fe.elsujeto);
         } catch (UnknownHostException ex) {
             System.out.println("Error al buscar al coordinador "+ex);
         }

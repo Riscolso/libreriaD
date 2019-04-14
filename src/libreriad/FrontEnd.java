@@ -108,7 +108,7 @@ public class FrontEnd {
     }
     
     public String pedirLibro() throws UnknownHostException, IOException{
-        Socket cl= new Socket(InetAddress.getByName(MuestraImage.maq),1234);
+        Socket cl= new Socket(InetAddress.getByName(MuestraImage.maq+elsujeto),1234);
         //Hacemos una petición
         PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
         pw.println("Dame libro >:v");
