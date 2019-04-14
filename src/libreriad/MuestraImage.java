@@ -4,9 +4,11 @@
 //Puerto para replicas 2065
 //Puerto para elecciones 2066
 //Puerto para latidos 2067
+//Puerto para escuchar chismes 2068
 //Mostrar portada en los nodos secundarios
 //Sincronizar los relojes entre los coordinadores
 //Apagar el servidor de libros si no es el coordinador
+//Apagar el servidor de listas
 
 //Frontend
 //Pasar la base de datos al levantarse
@@ -61,7 +63,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class MuestraImage extends javax.swing.JFrame implements Serializable {
     //Nombre de las máquinas
-    String maq = "E";
+    public final static String maq = "E";
     //Relojes
     private String tiempo[];
     public static int segundero[];
@@ -97,6 +99,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     boolean primario = true;
     //Nodo coordinador
     int elsujeto = -1;
+    
+    public static boolean procesando = false;
+    
     /*----------------------------------Código algoritmo anillo--------------------------------*/
     public Runnable beat(){
         return new Runnable(){
@@ -130,7 +135,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     }
     
     //Determina si un nodo especifico esta vivo Y tiene la aplicación corriendo            
-    public boolean stillAlive(InetAddress ia){
+    public static boolean stillAlive(InetAddress ia){
         try {
             Socket cl = new Socket();
             //Le damos 3 segundos para aceptar la conexión, si no la app en la PC no esta iniciada
@@ -176,7 +181,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     
     //Inicia una elección a sus siguientes
     //Envía trama al siguiente (Si esta vivo, si no lo brinca)
-    public void timeToDuel(){
+    //Retorna cuando ya se escogió un nuevo nodo
+    public boolean timeToDuel(){
         //Enviar al siguiente
         //El ciclo enpieza en su nombre + 1, ósea el siguiente directo
         try{
@@ -195,18 +201,27 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                     System.out.println(n.subList(0,n.size())+"\n");
                     ods.writeObject(n);
                     ods.flush();
+                    while(procesando){
+                        System.out.println("Procesando nuevo coordinador...");
+                        //Esperara a que se termine de escoger un nuevo coordinador
+                        //El sleep es para que no se gasten taaaaaantos recursos
+                        Thread.sleep(1000);
+                    }
+                    System.out.println("Nuevo coordinador");
                     b = true;
                     nodo.close();
-                    break;
+                    return true;
                 }
             }
-            //Si no había sanie disponible, este nodo pasa a ser el nuevo coordinador
+            //Si no había nadie disponible, este nodo pasa a ser el nuevo coordinador
             if(!b){
                 System.out.println("Soy el nuevo coordinador por que no hay nadie mas\nHello darkness my old friend");
                 elsujeto = name;
             }
+            return true;
         }catch(Exception ex){
             System.out.println("Error en el inicio de elección "+ex);
+            return false;
         }
     }
     
@@ -301,6 +316,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                     ods.flush();
                                     nodo.close();
                                 }
+                                procesando = true;
                             }
                             //En otro caso, pásalas si no te embarazas 
                             else{
@@ -339,6 +355,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             guardarLista(namae);
                             System.out.println("La nueva tabla de siguientes "+namae.subList(0, namae.size()));
                             System.out.println("Yes, we can!: "+elsujeto);
+                            procesando = true;
                         }
                     }
                 }catch(Exception ex){
@@ -348,7 +365,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         };
     }
     
-    //Guardar un objeto en una lista
+    //Guardar un objeto en un archivo
     public void guardarLista(ArrayList<Integer> al){
         File archivo=new File("siguientes.obj");
         try{
@@ -360,7 +377,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         }
     }
     
-    //Cargar un objeto a una lista
+    //Cargar un objeto en un archivo
     public ArrayList<Integer> cargarLista(){
         ArrayList<Integer> lp = new ArrayList<Integer>();
         try{
@@ -374,6 +391,41 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             return lp;
         }
     }
+    
+    //Escucha cuando un FE le dice que se cayó el primario
+    public void serverChismes(){
+        Thread t = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                try {
+                    ServerSocket s = new ServerSocket(2068);
+                    while(true){
+                        Socket cl = s.accept();
+                        BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
+                        br.readLine();
+                        System.out.println("Un pajarito me dijo que el coordiandor se murió");
+                        //Esperar a que termine de escoger un nuevo coordinador
+                        if(timeToDuel()){
+                            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                            pw.println("Listo"); //Le envía cuando hay nuevo coordinador
+                            pw.flush();
+                        }
+                        else{
+                            System.out.println("Algo salió mal en el server de chismes");
+                            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                            pw.println(":C"); //Le envía cuando hay nuevo coordinador
+                            pw.flush();
+                        }
+                    }
+                } catch (IOException ex) {
+                    System.out.println("Error en el servidor de chismes "+ ex);
+                }
+            }
+        });
+        t.start();
+    }
+    
+    
     /*----------------------------------Código replicación(priamria)---------------------------*/
     
     //Para el nodo principal
@@ -820,12 +872,13 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 //Escuchar cada que hay una replica, el primario nunca lo va a iniciar
                 Thread replica = new Thread(serverReplica());
                 replica.start();
+                //Escuchar a los FE cuando se caíga el principal
+                serverChismes();
             }
         }
         else{
             timeToDuel();
         }
-        
     }
 
     @SuppressWarnings("unchecked")

@@ -19,7 +19,7 @@ import static libreriad.MuestraImage.cadenaDig;
 
 
 public class RelojUsuario extends javax.swing.JFrame {
-
+    FrontEnd fe;
     InetAddress gpo = null;
     MulticastSocket cl;
     private String tiempo;
@@ -34,9 +34,22 @@ public class RelojUsuario extends javax.swing.JFrame {
     public RelojUsuario() {
         initComponents();
         btnPedir.setVisible(false);
+        fe = new FrontEnd();
+        //Obtener el número del coordiandor
+        try {
+            if(fe.buscarElSujeto() == -1) System.out.println("No hay coordinadores activos ");
+        } catch (UnknownHostException ex) {
+            System.out.println("Error al buscar al coordinador "+ex);
+        }
+        try {
+            //Iniciar el servidor que escucha el nuevo coordinador
+            fe.servidorCoordinador();
+        } catch (IOException ex) {
+            Logger.getLogger(RelojUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    //CÓDIGO
+    
     public static void setTime(String nvoTime, int seg){
         //Nuevo valor de tiempo
         lbr.setText(nvoTime);
@@ -44,7 +57,7 @@ public class RelojUsuario extends javax.swing.JFrame {
         //Nuevo valor del segundero
         //segundero = Integer.parseInt(seg);
     }
-    //CÓDIGO
+    
 
 
     @SuppressWarnings("unchecked")
@@ -239,7 +252,11 @@ public class RelojUsuario extends javax.swing.JFrame {
     }//GEN-LAST:event_btniniActionPerformed
 
     private void btnPedirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPedirActionPerformed
-        
+        try {
+            lbLibro.setText("Libro otorgado: "+ fe.peticion());
+        } catch (IOException ex) {
+            System.out.println("Error en la petición "+ex);
+        }
     }//GEN-LAST:event_btnPedirActionPerformed
 
     /**
