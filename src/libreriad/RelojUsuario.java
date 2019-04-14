@@ -28,8 +28,9 @@ public class RelojUsuario extends javax.swing.JFrame {
     //Número de reloj que tiene asignado
     private String nr;
     //IP del servidor
-    private String ips;
     
+    
+    /*--------------------------Constructor--------------------*/
     public RelojUsuario() {
         initComponents();
         btnPedir.setVisible(false);
@@ -109,7 +110,7 @@ public class RelojUsuario extends javax.swing.JFrame {
                         .addComponent(btnPedir))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(48, 48, 48)
-                        .addComponent(lbLibro)))
+                        .addComponent(lbLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -127,8 +128,8 @@ public class RelojUsuario extends javax.swing.JFrame {
                 .addGap(26, 26, 26)
                 .addComponent(btnPedir)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lbLibro)
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addComponent(lbLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         lbr.setVisible(false);
@@ -161,10 +162,6 @@ public class RelojUsuario extends javax.swing.JFrame {
             //Se cacha dos veces el datagrama por que le llega lo que envió arriba
             cl.receive(p);
             cl.receive(p);
-            //System.out.println("Ira lo que me llegó "+p.getSocketAddress());
-            
-            //Asignar IP del servidor
-            ips = p.getAddress()+"";
             
             //Asignar tiempo y segundero
             String m = new String(p.getData()).substring(0, 8);
@@ -242,32 +239,7 @@ public class RelojUsuario extends javax.swing.JFrame {
     }//GEN-LAST:event_btniniActionPerformed
 
     private void btnPedirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPedirActionPerformed
-        try{
-            //Creamos el socket
-            //System.out.println("LLEGOOOOOOOOO");
-            System.out.println("El ip "+ips);
-            //OJO AQUÍ 
-            Socket cl= new Socket("127.0.0.1",1234);
-            
-            //Hacemos una petición
-            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-            pw.println("Dame libro >:v");
-            pw.flush();     
-            
-            //Creamos un flujo de caracter ligado al socket para recibir el mensaje
-            BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
-            
-            //Leemos el mensaje recibido 
-            String mensaje= br2.readLine();
-            lbLibro.setText("Libro otorgado: "+ mensaje);
-            //System.out.println("Recibimos un mensaje desde el servidor");
-            //System.out.println("\n\nMensaje: "+mensaje);
-            //Cerramos los flujos, el socket y terminamos el programa
-            //br2.close();
-            //cl.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        
     }//GEN-LAST:event_btnPedirActionPerformed
 
     /**
@@ -317,7 +289,7 @@ public class RelojUsuario extends javax.swing.JFrame {
     private javax.swing.JButton btnPedir;
     private javax.swing.JButton btnini;
     private javax.swing.JLabel lb;
-    private javax.swing.JLabel lbLibro;
+    public static javax.swing.JLabel lbLibro;
     private javax.swing.JLabel lbh;
     private static javax.swing.JLabel lbr;
     private javax.swing.JSpinner spn;

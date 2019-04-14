@@ -12,7 +12,7 @@
 //Pasar la base de datos al levantarse
 
 //Replicación
-//Responde primero al servidor y después hace las replicaciones
+//Qué pasa si lo que responde el secundario no es Chido (Y)
 package libreriad;
 
 import java.awt.Image;
@@ -289,6 +289,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                 namae = prepaSig(n);
                                 System.out.println("La nueva tabla de siguientes "+namae.subList(0, namae.size()));
                                 System.out.println("Valor de la "+la.subList(0, la.size()));
+                                //Guardar en el archivo - por si se cae, para cuando se vuelva a levantar ya sabe a donde tirar tierra xD
+                                guardarLista(namae);
                                 //Enviar a todos los nodos siguientes
                                 for(int e=0;e<namae.size();e++){
                                     Socket nodo = new Socket(InetAddress.getByName(maq+namae.get(e)), 2066);
@@ -333,6 +335,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             elsujeto = n.get(1);
                             //Actualizar tabla de los siguientes
                             namae = prepaSig(n);
+                            //Guardar en el archivo - por si se cae, para cuando se vuelva a levantar ya sabe a donde tirar tierra xD
+                            guardarLista(namae);
                             System.out.println("La nueva tabla de siguientes "+namae.subList(0, namae.size()));
                             System.out.println("Yes, we can!: "+elsujeto);
                         }
@@ -373,11 +377,12 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     /*----------------------------------Código replicación(priamria)---------------------------*/
     
     //Para el nodo principal
-    public void replicacion(Peticion p){
+    public boolean replicacion(Peticion p){
         try{
             ObjectOutputStream oos=null;
             //Envíar a todos los nodos secuandarios 
             //La primera posición es del principal
+            boolean b = true;
             for(int j=0;j<namae.size();j++){
                 InetAddress dir = InetAddress.getByName(maq+namae.get(j));
                 //Determinar si el nodo esta disponible
@@ -392,14 +397,16 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                     //Creamos un flujo de caracter ligado al socket para recibir el mensaje
                     BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                     //Esperar el acuse de recibido
-                    br2.readLine();
-                    System.out.println("Ya lo envié we");
+                    if (!br2.readLine().equals("Chido (Y)")) b=false;
                     /*Inserte código de manejo de errores cuando el nodo remoto te diga que salió mal xD*/
                 }
                 else System.out.println("Busca un ataud pequeño, por que el nodo "+j+" se murió :C");
             }
+            //Regresa si se guardó todo correctamente
+            return b;
         }catch(Exception ex){
-            ex.printStackTrace();
+            System.out.println("Error en el hilo de replicas "+ ex);
+            return false;
         }
     }
     
@@ -442,8 +449,10 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                         pw.println("Chido (Y)");
                         pw.flush();
                     }
-                }catch(Exception ex){
-                    System.out.println("Error en servidor de replica "+ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(MuestraImage.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(MuestraImage.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         };
@@ -495,10 +504,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             public void run() {
                 try{
                     ServerSocket s = new ServerSocket(1234);
-                    //InetAddress.getByAddress("198.168.1.73".getBytes());
-                    InetAddress address = InetAddress.getLocalHost(); 
-                    //String hostIP = address.getHostAddress() ;
-                    //String hostName = address.getHostName();
                     System.out.println("Servidor de peticiones inciado...");
                     //System.out.println( "IP: " + hostIP + "\n" + "Name: " + hostName);
 
@@ -529,11 +534,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                 //System.out.println("Aqui: "+ con.obtenerDisp(aux));
                                 if("Disponible".equals(con.obtenerDisp(aux))){
                                     p.setLibro(con.obtenerNombreLibro(aux));
-                                    pw.println(p.getLibro());  //Enviar el nombre del libro
-                                    pw.flush();
                                     jNomLibro.setText(p.getLibro());
                                     muestraImagen();
-                                    con.modifDisp(jNomLibro.getText());
                                     JOptionPane.showMessageDialog(null, "Libro Prestado");
                                     break;
                                 }
@@ -545,17 +547,19 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             String ss = dateFormat.format(d);
                             p.setFecha(ss);
 
-                            //Registrar en la base de datos la petición y el usuario
+                            //Registrar en la base de datos la petición, el usuario y modificar la disponibilidad
                             con.almacenaUsuario(p);
                             con.almacenaPedido(p);
                             con.almanenaUsuarioSes(p);
+                            con.modifDisp(p.getLibro());
                             
                             //Replicación a todos los nodos secundarios
-                            replicacion(p);
+                            if(replicacion(p)) System.out.println("Todo salió bien en los secundarios");
                             
+                            //Hasta que todos hayan contestado, se envía al cliente
+                            pw.println(p.getLibro());  //Enviar el nombre del libro
+                            pw.flush();
                             
-                            /*Respaldo stub = (Respaldo) registry.lookup("res");
-                            stub.respaldoPeticion(p);*/
                             noLibros=con.obtenerLibros();
                             lbLibros.setText("Libros disponibles: "+ noLibros);
                         }
@@ -782,6 +786,10 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         Thread alive = new Thread(vivo());
         alive.start();
         
+        //Servidor de las peticiones de libro
+        Thread serverLibros = new Thread(servidorPeticiones());
+        serverLibros.start();
+        
         //Cargar los siguientes de una archivo
         //Si esta vacío es la primera vez que aparece el nodo
         namae = cargarLista();
@@ -800,9 +808,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 //Código para las peticiones
                 btnReIni.setVisible(true);
 
-                //Servidor de las peticiones de libro
-                Thread serverLibros = new Thread(servidorPeticiones());
-                serverLibros.start();
                 namae.add(2);
             }
             //Si es un nodo nuevo

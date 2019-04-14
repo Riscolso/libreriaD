@@ -68,7 +68,7 @@ public class ConexiónBD {
         }
     }
     
-    public void almacenaUsuario(Peticion p){
+    public void almacenaUsuario(Peticion p) {
         Connection con = getConnection();
         String insertar= "INSERT INTO Usuario (IP) VALUES (?)";
         PreparedStatement ps;
