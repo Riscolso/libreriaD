@@ -803,6 +803,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 //Servidor de las peticiones de libro
                 Thread serverLibros = new Thread(servidorPeticiones());
                 serverLibros.start();
+                namae.add(2);
             }
             //Si es un nodo nuevo
             else{
@@ -815,6 +816,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 Thread replica = new Thread(serverReplica());
                 replica.start();
             }
+        }
+        else{
+            timeToDuel();
         }
         
     }
