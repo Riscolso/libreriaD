@@ -435,7 +435,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             //Envíar a todos los nodos secuandarios 
             //La primera posición es del principal
             boolean b = true;
-            for(int j=elsujeto;j<namae.size();j++){
+            for(int j=0;j<namae.size();j++){
                 InetAddress dir = InetAddress.getByName(maq+namae.get(j));
                 //Determinar si el nodo esta disponible
                 if(stillAlive(dir)){
@@ -609,6 +609,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             if(replicacion(p)) System.out.println("Todo salió bien en los secundarios");
                             
                             //Hasta que todos hayan contestado, se envía al cliente
+                            System.out.println("Nombre del libro: "+p.getLibro());
                             pw.println(p.getLibro());  //Enviar el nombre del libro
                             pw.flush();
                             
@@ -620,8 +621,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             pw.println("Ya no hay >:v");//Supongo que ningún libro se llama así xD
                             pw.flush();
                             JOptionPane.showMessageDialog(null, 
-                              "Changos!", 
                               "Ya no hay libros :C", 
+                              "Changos!", 
                               JOptionPane.WARNING_MESSAGE);
                             lbLibros.setText("Libros disponibles: SOLD OUT");
                         }
@@ -766,6 +767,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
 
                     while(true){
                         s.receive(rec);
+                        System.out.println("Me llegó una petición de reloj "+ new String(p.getData()));
                         String aux = new String(rec.getData());
                         if(aux.charAt(0)=='c'){
                             //Enviar la hora del número que pidió el usuario

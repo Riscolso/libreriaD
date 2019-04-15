@@ -72,6 +72,7 @@ public class FrontEnd {
             else System.out.println("Ya valió, no hay servidores vivos");
         }
         //Si el coordinador esta vivo
+        System.out.println("Entro con "+elsujeto);
         return pedirLibro();
     }
     
