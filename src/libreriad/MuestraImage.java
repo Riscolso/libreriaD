@@ -78,6 +78,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     //Multicast - relojes
     public static InetAddress gpo = null;
     public static MulticastSocket s;
+    public static MulticastSocket s1;
     static DatagramPacket p = null;
     
     //Para base de datos
@@ -220,7 +221,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             if(!b){
                 System.out.println("Soy el nuevo coordinador por que no hay nadie mas\nHello darkness my old friend");
                 elsujeto = name;
-                
+                //Enviar a todos los FE
+                multiCoordinador(name);
             }
             return true;
         }catch(Exception ex){
@@ -320,6 +322,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                     ods.flush();
                                     nodo.close();
                                 }
+                                //Enviar a todos los FE
+                                multiCoordinador(name);
                             }
                             //En otro caso, pásalas si no te embarazas 
                             else{
@@ -434,27 +438,37 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         });
         t.start();
     }
-    /*
-    public void iniciarMultiCoor() throws IOException{
-        sc = new MulticastSocket(4001);
-        sc.setReuseAddress(true);//Se hace reusable para que el mismo servidor se pueda escuchar a sí mismo
-        sc.setTimeToLive(5);
-        gpo = InetAddress.getByName("228.1.1.2");
-        sc.joinGroup(gpo);//Nos unimos al canal multicast(Aunque seamos el server)
-    }*/
+    
+    //Inicia el canal muticast 
+    public void iniciarMulti(){
+        try {
+            s1 = new MulticastSocket(9876);
+            s1.setReuseAddress(true);
+            s1.setTimeToLive(3);
+            gpo = InetAddress.getByName("228.1.1.2");
+            s1.joinGroup(gpo);
+            System.out.println("Canal de multicast iniciado");
+        } catch (IOException ex) {
+            System.out.println("Error inciando multicast");
+        }
+    }
     
     //Envía a todos los FE cuál es el nuevo coordinador 
     //Ejecutable del hilo que actualiza el tiempo en relojes cliente - Multicast
-    /*public void multiCoordinador() throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        dos.writeInt(name);
-        dos.flush();
-        byte[] b = baos.toByteArray();
-        DatagramPacket p = new DatagramPacket(b,b.length,dst,2000);
-        cl.send(p);
-        cl.close();
-    }*/
+    public void multiCoordinador(int no){
+        try{
+            gpo = InetAddress.getByName("228.1.1.2");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            dos.writeInt(no);
+            dos.flush();
+            byte[] b = baos.toByteArray();
+            DatagramPacket p = new DatagramPacket(b,b.length,gpo,2000);
+            s1.send(p);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
     
     /*----------------------------------Código replicación(priamria)---------------------------*/
     
@@ -884,7 +898,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         Thread serverMulticastRelojes = new Thread(servidorRelojes());
         serverMulticastRelojes.start();
         
-        
+        //Iniciar el canal de comunicación que envía cuando hay nuevo coordinador a los FE
+        iniciarMulti();
         
         //Si no hay siguientes
         if(namae.size() == 0){

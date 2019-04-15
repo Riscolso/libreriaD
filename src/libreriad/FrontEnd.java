@@ -78,7 +78,7 @@ public class FrontEnd {
     
     //Escucha constantemenete cual es el nuevo coordinador
     public void servidorCoordinador() throws IOException{
-        MulticastSocket cl = new MulticastSocket(4001);
+        MulticastSocket cl = new MulticastSocket(2000);
         InetAddress gpo;
         //System.out.println("Cliente escuchando puerto "+cl.getLocalPort());
         cl.setReuseAddress(true);
