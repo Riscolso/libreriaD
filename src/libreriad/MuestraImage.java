@@ -11,8 +11,7 @@
 //Apagar el servidor de libros si no es el coordinador
 //Apagar el servidor de listas
 
-//Frontend
-//Pasar la base de datos al levantarse
+//Yeah
 
 //Replicación
 //Qué pasa si lo que responde el secundario no es Chido (Y)
