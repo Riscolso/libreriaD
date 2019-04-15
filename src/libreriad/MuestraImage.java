@@ -121,11 +121,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                 timeToDuel();
                             }
                             //El latido se hace cada 5 min
-                            Thread.sleep(10000);
+                            Thread.sleep(5000);
                         }
                         //Para que no gaste muchos recursos
                         System.out.println("Hilo de beat apagado");
-                        Thread.sleep(50000);
+                        Thread.sleep(1000);
                     }
                 }catch(Exception ex){
                     System.out.println("Error en el hilo de latido "+ex);
@@ -316,6 +316,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                     ods.flush();
                                     nodo.close();
                                 }
+                                //Iniciar servidor de relojes
+                                Thread serverMulticastRelojes = new Thread(servidorRelojes());
+                                serverMulticastRelojes.start();
                                 procesando = true;
                             }
                             //En otro caso, pásalas si no te embarazas 
@@ -848,9 +851,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         //Si esta vacío es la primera vez que aparece el nodo
         namae = cargarLista();
         
-        //Servidor de relojes
-        Thread serverMulticastRelojes = new Thread(servidorRelojes());
-        serverMulticastRelojes.start();
         
         //Si no hay siguientes
         if(namae.size() == 0){
@@ -861,10 +861,14 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
 
                 //Código para las peticiones
                 btnReIni.setVisible(true);
+                
+                //Inicar servidor de relojes
+                Thread serverMulticastRelojes = new Thread(servidorRelojes());
+                serverMulticastRelojes.start();
 
                 namae.add(2);
             }
-            //Si es un nodo nuevo
+            //Si es un nodo nuevo y es secundario
             else{
                 //El nodo 1 siempre debe estar endendido cuando se inicia un nodo nuevo
                 namae.add(1);
@@ -878,6 +882,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 serverChismes();
             }
         }
+        //Si esta reviviendo de sus cenizas cual ave fénix
         else{
             timeToDuel();
         }
