@@ -167,25 +167,9 @@ public class RelojUsuario extends javax.swing.JFrame {
             //Numero de cliente
             //String cli="c";
             nr = spn.getValue()+"";
-            DatagramPacket envio = new DatagramPacket (("c"+nr).getBytes(), ("c"+nr).getBytes().length, gpo, 4000); 
+            DatagramPacket envio = new DatagramPacket (("c"+nr).getBytes(), ("c"+nr).getBytes().length, gpo, 9875); 
             //Enviar una solicitud
             cl.send(envio);
-            
-            
-            DatagramPacket p = new DatagramPacket(new byte[20], 20);
-            //Se cacha dos veces el datagrama por que le llega lo que envió arriba
-            cl.receive(p);
-            System.out.println("Me llega "+new String(p.getData()));
-            System.out.println("llego hasta acá1");
-            cl.receive(p);
-            System.out.println("llego hasta acá");
-            
-            //Asignar tiempo y segundero
-            String m = new String(p.getData()).substring(0, 8);
-            String s = new String(p.getData()).substring(8, 12);
-            setTime(m ,1000);
-            //System.out.println("Segundero "+s);
-            //lbr.setText(m,);
             
             lbr.setVisible(true);
             btnini.setVisible(false);
@@ -197,14 +181,16 @@ public class RelojUsuario extends javax.swing.JFrame {
             canal = new Thread(new Runnable(){
                 @Override
                 public void run(){
+                    DatagramPacket rec = new DatagramPacket(new byte[20], 20);
                     while(true){
-                        DatagramPacket rec = new DatagramPacket(new byte[20], 20);
                         try {
                             cl.receive(rec);
+                            System.out.println("Llega "+new String(rec.getData()));
                             String aux = new String(rec.getData());
                             //Recibir mensajes solo de su numero de reloj
                             if(aux.charAt(0)!='c' && aux.charAt(8)==nr.charAt(0)){
-                                setTime(aux.substring(0,8),1000);
+                                lbr.setText(aux.substring(0,8));
+                                //System.out.println("Metí");
                             }
                         } catch (IOException ex) {
                             Logger.getLogger(RelojUsuario.class.getName()).log(Level.SEVERE, null, ex);
@@ -245,9 +231,9 @@ public class RelojUsuario extends javax.swing.JFrame {
                         }
                 }
             });
-            
-            hilo.start();
             canal.start();
+            hilo.start();
+            
             btnPedir.setVisible(true);
         }catch(Exception e){
             e.printStackTrace();

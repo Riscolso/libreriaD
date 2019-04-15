@@ -21,6 +21,8 @@ import java.awt.Image;
 import java.awt.List;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -439,7 +441,27 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         });
         t.start();
     }
+    /*
+    public void iniciarMultiCoor() throws IOException{
+        sc = new MulticastSocket(4001);
+        sc.setReuseAddress(true);//Se hace reusable para que el mismo servidor se pueda escuchar a sí mismo
+        sc.setTimeToLive(5);
+        gpo = InetAddress.getByName("228.1.1.2");
+        sc.joinGroup(gpo);//Nos unimos al canal multicast(Aunque seamos el server)
+    }*/
     
+    //Envía a todos los FE cuál es el nuevo coordinador 
+    //Ejecutable del hilo que actualiza el tiempo en relojes cliente - Multicast
+    /*public void multiCoordinador() throws IOException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeInt(name);
+        dos.flush();
+        byte[] b = baos.toByteArray();
+        DatagramPacket p = new DatagramPacket(b,b.length,dst,2000);
+        cl.send(p);
+        cl.close();
+    }*/
     
     /*----------------------------------Código replicación(priamria)---------------------------*/
     
@@ -767,9 +789,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             @Override
             public void run() {
                 try{
-                    s = new MulticastSocket(4000);
-                    s.setReuseAddress(true);//Se hace reusable para que el mismo servidor se pueda escuchar a sí mismo
-                    s.setTimeToLive(5);
+                    s = new MulticastSocket(9875);
+                    s.setReuseAddress(true);
+                    s.setTimeToLive(3);
                     gpo = InetAddress.getByName("228.1.1.1");
                     s.joinGroup(gpo);//NOs unimos al canal multicast(Aunque seamos el server)
                     System.out.println("Servidor de relojes iniciado ");
@@ -778,15 +800,18 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                     //Datagrama para recibir
                     DatagramPacket rec = new DatagramPacket(new byte[20], 20);
                     //Datagrama para enviar
+                    //Envia a los que esten suscritos al puerto 4000
                     p = new DatagramPacket(tiempo[0].getBytes(),tiempo[0].getBytes().length,gpo,4000);
-
+                    
                     while(true){
                         s.receive(rec);
                         System.out.println("Me llegó una petición de reloj "+ new String(rec.getData()));
                         String aux = new String(rec.getData());
                         if(aux.charAt(0)=='c'){
                             //Enviar la hora del número que pidió el usuario
-                            p.setData(tiempo[Integer.parseInt(aux.substring(1,2))].getBytes());
+                            String msj = new String(tiempo[Integer.parseInt(aux.substring(1,2))]+aux.substring(1,2));
+                            
+                            p.setData(msj.getBytes());
                             s.send(p);
                         }
                     }
@@ -903,6 +928,10 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             replica.start();
             //Escuchar a los FE cuando se caíga el principal
             serverChismes();
+        }
+        //Y ya si es el coordinador principal el que revive
+        else{
+            timeToDuel();
         }
     }
 
