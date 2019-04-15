@@ -219,9 +219,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             //Si no había nadie disponible, este nodo pasa a ser el nuevo coordinador
             if(!b){
                 System.out.println("Soy el nuevo coordinador por que no hay nadie mas\nHello darkness my old friend");
-                //Iniciar servidor de relojes
-                Thread serverMulticastRelojes = new Thread(servidorRelojes());
-                serverMulticastRelojes.start();
                 elsujeto = name;
                 
             }
@@ -323,10 +320,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                     ods.flush();
                                     nodo.close();
                                 }
-                                //Iniciar servidor de relojes
-                                Thread serverMulticastRelojes = new Thread(servidorRelojes());
-                                serverMulticastRelojes.start();
-                                procesando = true;
                             }
                             //En otro caso, pásalas si no te embarazas 
                             else{
@@ -887,6 +880,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         //Si esta vacío es la primera vez que aparece el nodo
         namae = cargarLista();
         
+        //Iniciar servidor de relojes
+        Thread serverMulticastRelojes = new Thread(servidorRelojes());
+        serverMulticastRelojes.start();
+        
+        
         
         //Si no hay siguientes
         if(namae.size() == 0){
@@ -898,9 +896,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 //Código para las peticiones
                 btnReIni.setVisible(true);
                 
-                //Iniciar servidor de relojes
-                Thread serverMulticastRelojes = new Thread(servidorRelojes());
-                serverMulticastRelojes.start();
+                
 
                 namae.add(2);
             }
