@@ -7,10 +7,14 @@ import java.util.Date;
 import java.util.Random;
 
 public class LibreriaD {
-
+    //Para base de datos
+    
     public static void main(String[] args) throws ParseException {
-        System.out.println(idLibro());
-       
+        ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/libreriad");
+        con.borrarBD();
+        ConexiónBD con2 = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306");
+        con2.crearBD();
+        con.cargarBD();
     }
     public static int idLibro() {
         Random r = new Random();

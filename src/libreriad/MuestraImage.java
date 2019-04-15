@@ -86,7 +86,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     
     //Para base de datos
     ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/libreriad");
-    
+    ConexiónBD con2 = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306");
     /*Arreglo con Todos los botones que muentran la hora
     Pa' modificarlos por bonche, mas fácil :)*/
     public static JButton BRelojes[];
@@ -528,6 +528,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             for(int e=0;e<namae.size();e++){
                 //comprobar que esta vivo,si no lo toma como muerto y envia al siguiente
                 if(stillAlive(InetAddress.getByName(maq+namae.get(e)))){
+                    //ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/libreriad");
                     con.borrarBD();
                     Socket cl = new Socket(InetAddress.getByName(maq+namae.get(e)), 2069);
                     DataInputStream dis = new DataInputStream(cl.getInputStream());
@@ -547,13 +548,14 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                         dos.flush();
                         recibidos += n;
                         porcentaje = (int)(recibidos*100/tam);
-                        System.out.println("\n\nArchivo Recibido");
                     }
+                    System.out.println("Archivo Recibido");
                     //cierre de  flujo
                     dos.close();
                     dis.close();
                     cl.close();
-                    con.crearBD();
+                    
+                    con2.crearBD();
                     con.cargarBD();
                 }
             }
@@ -1013,7 +1015,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             else{
                 //El nodo 1 siempre debe estar encendido cuando se inicia un nodo nuevo
                 namae.add(1);
-                pedirBD();
+                
                 timeToDuel();
                 Thread beats = new Thread(beat());
                 beats.start();
@@ -1022,6 +1024,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 replica.start();
                 //Escuchar a los FE cuando se caíga el principal
                 serverChismes();
+                
+                pedirBD();
             }
         }
         //Si esta reviviendo de sus cenizas cual ave fénix

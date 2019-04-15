@@ -229,7 +229,7 @@ public class ConexiónBD {
     
     public void cargarBD(){
         try {
-            Process p = Runtime.getRuntime().exec("C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysql -u root -proot libreriad_r");
+            Process p = Runtime.getRuntime().exec("C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysql -u root -proot libreriad");
             OutputStream os = p.getOutputStream();
             FileInputStream fis = new FileInputStream("respaldito.sql");
 
