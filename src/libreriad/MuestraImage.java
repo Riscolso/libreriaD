@@ -125,7 +125,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                         }
                         //Para que no gaste muchos recursos
                         System.out.println("Hilo de beat apagado");
-                        Thread.sleep(1000);
+                        Thread.sleep(60*1000);
                     }
                 }catch(Exception ex){
                     System.out.println("Error en el hilo de latido "+ex);
@@ -216,7 +216,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             //Si no había nadie disponible, este nodo pasa a ser el nuevo coordinador
             if(!b){
                 System.out.println("Soy el nuevo coordinador por que no hay nadie mas\nHello darkness my old friend");
+                //Iniciar servidor de relojes
+                Thread serverMulticastRelojes = new Thread(servidorRelojes());
+                serverMulticastRelojes.start();
                 elsujeto = name;
+                
             }
             return true;
         }catch(Exception ex){
@@ -862,7 +866,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 //Código para las peticiones
                 btnReIni.setVisible(true);
                 
-                //Inicar servidor de relojes
+                //Iniciar servidor de relojes
                 Thread serverMulticastRelojes = new Thread(servidorRelojes());
                 serverMulticastRelojes.start();
 
@@ -1210,6 +1214,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         for(int a : namae){
             System.out.print(a+" ");
         }
+        System.out.println("");
     }//GEN-LAST:event_btncorActionPerformed
     
     /**
