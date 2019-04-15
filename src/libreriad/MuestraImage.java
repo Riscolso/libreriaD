@@ -953,7 +953,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     public MuestraImage() {
         initComponents();
         setLocationRelativeTo(this);
-        btnReIni.setVisible(false);
+        btnReIni.setVisible(true);
         
         //Vista para mostrar info del libro 
         vistaInfoLibro();
@@ -1045,6 +1045,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             timeToDuel();
             pedirBD();
         }
+        noLibros=con.obtenerLibros();
+        lbLibros.setText("Libros disponibles: "+ noLibros);
     }
 
     @SuppressWarnings("unchecked")
