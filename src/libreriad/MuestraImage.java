@@ -77,6 +77,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     int i;
     //Multicast - relojes
     public static InetAddress gpo = null;
+    InetAddress gru = null;
     public static MulticastSocket s;
     public static MulticastSocket s1;
     static DatagramPacket p = null;
@@ -445,8 +446,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             s1 = new MulticastSocket(9876);
             s1.setReuseAddress(true);
             s1.setTimeToLive(3);
-            gpo = InetAddress.getByName("228.1.1.2");
-            s1.joinGroup(gpo);
+            gru = InetAddress.getByName("228.1.1.2");
+            s1.joinGroup(gru);
             System.out.println("Canal de multicast iniciado");
         } catch (IOException ex) {
             System.out.println("Error inciando multicast");
@@ -457,13 +458,14 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     //Ejecutable del hilo que actualiza el tiempo en relojes cliente - Multicast
     public void multiCoordinador(int no){
         try{
-            gpo = InetAddress.getByName("228.1.1.2");
+            System.out.println("Voy a enviar que soy coordinador a los FE");
+            //gpo = InetAddress.getByName("228.1.1.2");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
             dos.writeInt(no);
             dos.flush();
             byte[] b = baos.toByteArray();
-            DatagramPacket p = new DatagramPacket(b,b.length,gpo,2000);
+            DatagramPacket p = new DatagramPacket(b,b.length,gru,2000);
             s1.send(p);
         }catch(Exception e){
             e.printStackTrace();
@@ -817,7 +819,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                         if(aux.charAt(0)=='c'){
                             //Enviar la hora del número que pidió el usuario
                             String msj = new String(tiempo[Integer.parseInt(aux.substring(1,2))]+aux.substring(1,2));
-                            
+                            System.out.println("Voy a enviar "+msj);
                             p.setData(msj.getBytes());
                             s.send(p);
                         }
