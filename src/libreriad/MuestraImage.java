@@ -5,6 +5,7 @@
 //Puerto para elecciones 2066
 //Puerto para latidos 2067
 //Puerto para escuchar chismes 2068
+//Puerto para BD 2069
 //Mostrar portada en los nodos secundarios
 //Sincronizar los relojes entre los coordinadores
 //Apagar el servidor de libros si no es el coordinador
@@ -22,6 +23,7 @@ import java.awt.List;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -473,6 +475,92 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     }
     
     /*----------------------------------Código replicación(priamria)---------------------------*/
+    //Servidor que cuando le piden la base de datos, genera sql y envia
+    public void enviarBD(){
+        Thread t = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                try{
+                    ServerSocket s = new ServerSocket(2069);
+                    while(true){
+                        Socket cl = s.accept();
+                        con.respaldarBD();
+                        String ar = "respaldito.sql";
+                        File f = new File(ar);
+                        long tam = f.length(); //Tamaño
+                        DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
+                        //Flujo de datos orientados a byte para la lectura de los archivos
+                        DataInputStream dis = new DataInputStream(new FileInputStream(ar));
+                        //Envio de datos henerales del archivo por el socket
+                        dos.writeUTF(ar);
+                        dos.flush();
+                        dos.writeLong(tam);
+                        dos.flush();
+                        //Leer los datos contenidos en el archivo en paquetes de 1024  y los enviamos por el socket
+                        byte[] b = new byte[1024];
+                        long enviados =0;
+                        int porcentaje, n;
+                        while(enviados<tam){
+                            n = dis.read(b);
+                            //System.out.println("Mira b"+b);
+                            dos.write(b,0,n);
+                            dos.flush();
+                            enviados += n;
+                            porcentaje = (int)(enviados*100/tam);
+                            //System.out.println("Enviado: "+porcentaje+"%\r");
+                        }
+                        System.out.println("\n\nArchivo enviado");
+                        dos.close();
+                        dis.close();
+                        cl.close();
+                    }
+                } catch (IOException ex) {
+                    System.out.println("Error en enviar BD "+ex);
+                } 
+            }
+        });
+        t.start();
+    }
+
+    //Pide al siguiente la base de datos
+    public void pedirBD(){
+        try {
+            for(int e=0;e<namae.size();e++){
+                //comprobar que esta vivo,si no lo toma como muerto y envia al siguiente
+                if(stillAlive(InetAddress.getByName(maq+namae.get(e)))){
+                    con.borrarBD();
+                    Socket cl = new Socket(InetAddress.getByName(maq+namae.get(e)), 2069);
+                    DataInputStream dis = new DataInputStream(cl.getInputStream());
+                    //Leer losdatos principales del archivo y crear un flujo 
+                    //Para escribir el archivo de salida
+                    byte[] b = new byte[1024];
+                    String nombre = dis.readUTF();
+                    System.out.println("Recibimos el archivo"+nombre);
+                    long tam = dis.readLong();
+                    DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
+                    long recibidos =0;
+                    int n, porcentaje;
+                    //Definimos el ciclo donde estaremos recibiendo los datos enviados por el cliente
+                    while(recibidos<tam){
+                        n = dis.read(b);
+                        dos.write(b,0,n);
+                        dos.flush();
+                        recibidos += n;
+                        porcentaje = (int)(recibidos*100/tam);
+                        System.out.println("\n\nArchivo Recibido");
+                    }
+                    //cierre de  flujo
+                    dos.close();
+                    dis.close();
+                    cl.close();
+                    con.crearBD();
+                    con.cargarBD();
+                }
+            }
+        } catch (IOException ex) {
+            System.out.println("Error en pedir la BD "+ex);
+        }
+    }
     
     //Para el nodo principal
     public boolean replicacion(Peticion p){
@@ -903,6 +991,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         //Iniciar el canal de comunicación que envía cuando hay nuevo coordinador a los FE
         iniciarMulti();
         
+        //Hilo para enviar BD
+        enviarBD();
+        
         //Si no hay siguientes
         if(namae.size() == 0){
             //Si es el primerísimo de todos 
@@ -913,14 +1004,16 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 //Código para las peticiones
                 btnReIni.setVisible(true);
                 
-                
+                //Generar sql de la bd
+                con.respaldarBD();
 
                 namae.add(2);
             }
             //Si es un nodo nuevo y es secundario
             else{
-                //El nodo 1 siempre debe estar endendido cuando se inicia un nodo nuevo
+                //El nodo 1 siempre debe estar encendido cuando se inicia un nodo nuevo
                 namae.add(1);
+                pedirBD();
                 timeToDuel();
                 Thread beats = new Thread(beat());
                 beats.start();
@@ -941,10 +1034,12 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             replica.start();
             //Escuchar a los FE cuando se caíga el principal
             serverChismes();
+            pedirBD();
         }
         //Y ya si es el coordinador principal el que revive
         else{
             timeToDuel();
+            pedirBD();
         }
     }
 
