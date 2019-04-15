@@ -151,7 +151,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             System.out.println("La aplicación al nodo que se quiere conectar no está disponible");
             return false;
         } catch (IOException ex) {
-            System.out.println("Error en Still Alive");
+            //Cuando no se puede hacer conexión con nodo especificado
+            //System.out.println("Error en Still Alive");
             return false;
         }
     }
@@ -411,17 +412,24 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                         BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                         br.readLine();
                         System.out.println("Un pajarito me dijo que el coordiandor se murió");
-                        //Esperar a que termine de escoger un nuevo coordinador
-                        if(timeToDuel()){
-                            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                        PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                        //Si ya es el coordinador, namás le das el avión jajajaja
+                        if(elsujeto == name){
                             pw.println("Listo"); //Le envía cuando hay nuevo coordinador
                             pw.flush();
                         }
+                        //Ah no ma, sí tiene razón
                         else{
-                            System.out.println("Algo salió mal en el server de chismes");
-                            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-                            pw.println(":C"); //Le envía cuando hay nuevo coordinador
-                            pw.flush();
+                            //Esperar a que termine de escoger un nuevo coordinador
+                            if(timeToDuel()){
+                                pw.println("Listo"); //Le envía cuando hay nuevo coordinador
+                                pw.flush();
+                            }
+                            else{
+                                System.out.println("Algo salió mal en el server de chismes");
+                                pw.println(":C"); //Le envía cuando hay nuevo coordinador
+                                pw.flush();
+                            }
                         }
                     }
                 } catch (IOException ex) {
@@ -774,7 +782,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
 
                     while(true){
                         s.receive(rec);
-                        System.out.println("Me llegó una petición de reloj "+ new String(p.getData()));
+                        System.out.println("Me llegó una petición de reloj "+ new String(rec.getData()));
                         String aux = new String(rec.getData());
                         if(aux.charAt(0)=='c'){
                             //Enviar la hora del número que pidió el usuario
@@ -782,7 +790,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             s.send(p);
                         }
                     }
-
                 }catch(Exception e){
                     e.printStackTrace();
                 }
@@ -887,8 +894,15 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             }
         }
         //Si esta reviviendo de sus cenizas cual ave fénix
-        else{
+        else if(name!=1){
             timeToDuel();
+            Thread beats = new Thread(beat());
+            beats.start();
+            //Escuchar cada que hay una replica, el primario nunca lo va a iniciar
+            Thread replica = new Thread(serverReplica());
+            replica.start();
+            //Escuchar a los FE cuando se caíga el principal
+            serverChismes();
         }
     }
 
