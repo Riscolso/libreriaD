@@ -124,6 +124,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             if(!stillAlive(coordinador)){
                                 System.out.println("El coordinado..... AH MUERTO!");
                                 elsujeto = -1;
+                                procesando = true;
                                 timeToDuel();
                             }
                             //El latido se hace cada 5 min
@@ -411,6 +412,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                     ServerSocket s = new ServerSocket(2068);
                     while(true){
                         Socket cl = s.accept();
+                        procesando = false;
                         BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                         br.readLine();
                         System.out.println("Un pajarito me dijo que el coordiandor se murió");
@@ -631,6 +633,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                             con.modifDisp(p.getLibro());
                             noLibros=con.obtenerLibros();
                             lbLibros.setText("Libros disponibles: "+ noLibros);
+                            jNomLibro.setText(p.getLibro());
+                            muestraImagen();
                         }
                         //Enviando acuse
                         PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
@@ -1008,6 +1012,10 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 
                 //Generar sql de la bd
                 con.respaldarBD();
+                
+                //Escuchar cada que hay una replica
+                Thread replica = new Thread(serverReplica());
+                replica.start();
 
                 namae.add(2);
             }
@@ -1019,7 +1027,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 timeToDuel();
                 Thread beats = new Thread(beat());
                 beats.start();
-                //Escuchar cada que hay una replica, el primario nunca lo va a iniciar
+                //Escuchar cada que hay una replica
                 Thread replica = new Thread(serverReplica());
                 replica.start();
                 //Escuchar a los FE cuando se caíga el principal
@@ -1042,6 +1050,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         }
         //Y ya si es el coordinador principal el que revive
         else{
+            //Escuchar cada que hay una replica
+            Thread replica = new Thread(serverReplica());
+            replica.start();
             timeToDuel();
             pedirBD();
         }
@@ -1352,10 +1363,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     
     
     private void btnReIniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReIniActionPerformed
-        noLibros=con.obtenerLibros();
-        lbLibros.setText("Libros disponibles: "+ noLibros);
+        
         //Modificar la disponibilidad de manera local
         con.modifDispo();
+        noLibros=con.obtenerLibros();
+        lbLibros.setText("Libros disponibles: "+ noLibros);
         replicacion(new Peticion("-1"));
         /*try {
             //Modificar la disponibilidad de manera remota
