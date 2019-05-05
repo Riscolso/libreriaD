@@ -11,7 +11,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -288,5 +290,40 @@ public class ConexiónBD {
             System.out.println("Error al borrar la BD");
         }
     }
+    
+    /**
+    * Obtiene la información de los equipos, la encapsula en objetos tipo "Equipo"
+    * y los agrega a una lista
+    * @return ArrayList [&#8249;]Equipo[&#8250;] Todos los equipos de la base de datos
+    */
+    public ArrayList<Equipo> obtenerEquipos(){
+        //Borrar la línea de abajo
+        return new ArrayList<Equipo>();
+    }
+    
+    /**
+    * Registra un equipo en la base de datos y regresa su id de la BD
+    * @param e objeto con ip, nombre y latencia que se va a registrar
+    * @return El Id asignado a el equipo recien registrado en la BD
+    */
+    public int registrarEquipo(Equipo e){
+        return 1;
+    }
+    
+    
+    
+    /**
+     * Registra en las tablas HoraCentral y Hora equipos los parametros dados
+     * @param hp hPrev de Hora central
+     * @param hr hRef de Horal central
+     * @param idyhorEqui Mapa hash ("arreglo") con la dupla de Id del equipo y su hora, IDEquipo y h equipo de la tabla Hora equipos 
+     * @param ad tiempo que se adelantó el reloj (en segundos)
+     * @param rel tiempo que se retrasó el reloj (en segundos)
+     * @see <a href="https://jarroba.com/map-en-java-con-ejemplos" > HasMaps </a> para saber como obtener los datos de la dupla
+     */
+    public void registrarHora(int hp, int hr, Map<Integer, String> idyhorEqui, int ad, int rel){
+        
+    }
+    
     
 }
