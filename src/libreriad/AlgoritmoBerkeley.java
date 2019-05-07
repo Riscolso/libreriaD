@@ -1,5 +1,14 @@
+//Cuidado en donde poner los try-catch dentro de los ciclos infinitos
 package libreriad;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 
 /**
@@ -24,23 +33,24 @@ public class AlgoritmoBerkeley {
     /**
      * Lista de todos los equipos que se han conectado al servidor
      */
-    ArrayList<Equipo> equipos;
-    final int ptoBer = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
-    final int ptoNvo = 2071; //Puerto definido para cuando un nodo nuevo inicia
+    ArrayList<Equipo> equipos = new ArrayList<Equipo>();
+    final static int ptoBer = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
+    final static int ptoNvo = 2071; //Puerto definido para cuando un nodo nuevo inicia
     ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/      INSERTE NOMBRE DE LA BASE DE DATOS      "); //Objeto para usar la base de datos
-    String ipServ = "127.0.1.1"; //Dirección ip del servidor de tiempo
+    final static String ipServ = "localhost"; //Dirección ip del servidor de tiempo
     public AlgoritmoBerkeley(){
         
     }
     
     /**
-     * Calcula el tiempo de retardo entre los ciclos de sincronización de hora 2PS (P=latencia máxima,S=Tolerancia) <br>
+     * Calcula el tiempo (en segundos) de retardo entre los ciclos de sincronización de hora 2PS (P=latencia máxima,S=Tolerancia) <br>
      * Obtener P de {@link #obtenerLatenciaMax() } <br>
      * S es al gusto
+     * Completado.
      */
     public void calcularY(){
-        //obtenerLatenciaMax();
-        //y = valor calculado;
+        //Tolerancia de 1 minuto
+        y = 2*obtenerLatenciaMax()*60;
     }
     
     /**
@@ -68,8 +78,8 @@ public class AlgoritmoBerkeley {
      * @param ip computadora a la cual se va a calcular la latencia
      * @return latencia en segundos
      */
-    public int calcularLatencia(String ip){
-        return 0;
+    public int calcularLatencia(InetAddress ip){
+        return 1;
     }
     
     /**
@@ -97,11 +107,11 @@ public class AlgoritmoBerkeley {
     }
     
     /**
-     * Obtiene la latencia más grande de los equipos de la variable global "equipos"
+     * Obtiene la latencia más grande de los equipos de la variable global "equipos" (en segundos)
      * @return latencia mas grande
      */
     public int obtenerLatenciaMax(){
-        return 1;
+        return 2;
     }
     
     /**
@@ -113,13 +123,39 @@ public class AlgoritmoBerkeley {
      * PE: {@code equipo.setId(registrarEquipo(equipo));} <br>
      * 4.-Agregar el objeto con id, ip, nombre y latencia a la variable global "equipos" <br>
      * 5.-Llamar el método {@link #calcularY() } <br>
+     * 
+     * Estado: En pruebas
      */
     public void hiloEscuchaEquipos(){
         Thread t = new Thread(new Runnable(){
                 @Override
                 public void run(){
-                    while(true){
-                        calcularY();
+                    try {
+                        ServerSocket s = new ServerSocket(ptoNvo);
+                        while(true){
+                            System.out.println("Servidor de escucha equipos iniciado...");
+                            Socket cl= s.accept();
+                            BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
+                            br2.readLine();
+                            InetAddress ia = cl.getInetAddress();
+                            //Encapsular información
+                            Equipo e = new Equipo(ia.getHostAddress(), ia.getHostName(), calcularLatencia(ia));
+                            //Guardar en la BD  y asignar su Id al objeto
+                            e.setId(con.registrarEquipo(e));
+                            //Agregar a equipos
+                            equipos.add(e);
+                            //Imprimir datos
+                            System.out.println("Se encontró un nuevo nodo, guadado en la base de datos");
+                            e.imprimirEquipo();
+                            //Calcular el nuevo tiempo de retraso para sincronización
+                            calcularY();
+                            //Cerrar flujos
+                            br2.close();
+                            cl.close();
+                        }
+                    } catch (IOException ex) {
+                        System.out.println("Error en hilo escucha equipos ");
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -133,9 +169,23 @@ public class AlgoritmoBerkeley {
      * Enviar una trama a el servidor de tiempo, usando la ip ipServ y el puerto ptoNvo <br>
      * El mensaje puede ser el que sea <br>
      * Recibe una trama y muestra en consola que se ha registrado con el servidor de tiempo
+     * 
+     * Estado: Completo
      */
     public static void presentarse(){
-        
+        try{
+            //Crear el socket
+            Socket cl = new Socket(ipServ,ptoNvo);
+            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+            pw.println("Alo polisia?");
+            pw.flush();
+            //Cerramos los flujos, el socket y terminamos el programa
+            pw.close();
+            cl.close();
+        }catch(Exception e){
+            System.out.println("Error enviando presentación");
+            e.printStackTrace();
+        }
     }
     
     /**

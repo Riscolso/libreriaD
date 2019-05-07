@@ -11,6 +11,8 @@
 //Apagar el servidor de libros si no es el coordinador
 //Apagar el servidor de listas
 
+
+//Poner atención en los try-catch de los hiles infinitos (tal vez por eso no funcione bien)
 //Yeah
 
 //Replicación
@@ -18,7 +20,6 @@
 package libreriad;
 
 import java.awt.Image;
-import java.awt.List;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

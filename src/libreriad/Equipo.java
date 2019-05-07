@@ -10,11 +10,20 @@ public class Equipo {
         
     }
 
-    public Equipo(String ip, String nombre, int latencia, int id) {
+    public Equipo(String ip, String nombre, int latencia) {
         this.ip = ip;
         this.nombre = nombre;
         this.latencia = latencia;
-        this.id = id;
+    }
+    
+    /**
+     * Muestra la información del objeto
+     */
+    public void imprimirEquipo(){
+        System.out.println("Id: "+ getId());
+        System.out.println("Nombre: "+getNombre());
+        System.out.println("Ip: "+ getIp());
+        System.out.println("Latencia: "+getLatencia());
     }
 
     public int getId() {

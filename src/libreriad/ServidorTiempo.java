@@ -15,7 +15,8 @@ public class ServidorTiempo {
     }
     
     public ServidorTiempo(){
-        System.out.println("Servidor de Tiempo iniciado");
-        ab.berkeley();
+        ab = new AlgoritmoBerkeley();
+        ab.hiloEscuchaEquipos();
+        //ab.berkeley();
     }
 }
