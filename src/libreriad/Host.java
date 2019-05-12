@@ -1,15 +1,13 @@
 package libreriad;
 
-import java.net.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.net.InetAddress;
+
+
 public class Host {
     public static void main(String[] args) {
         try{
-            //AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
-            //ab.hiloEscuchaEquipos();
-            AlgoritmoBerkeley.presentarse();
+            AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
+            ab.calcularLatencia(InetAddress.getByName("192.168.1.74"));
         }
         
         catch(Exception e) {

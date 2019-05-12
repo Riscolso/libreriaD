@@ -30,12 +30,16 @@ public class AlgoritmoBerkeley {
      */
     String hora;
     /**
-     * Cada cuando se debe sincronizar la hora
+     * Cada cuando se debe sincronizar la hora en milisegundos
      */
     int y;
     /**
      * Lista de todos los equipos que se han conectado al servidor
      */
+    /**
+     * Tiempo de tolerancia para obtener Y en milisegundos
+     */
+    final int TIMETOLERA  = 60*1000;
     public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
     final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
     final static int PTONVO = 2071; //Puerto definido para cuando un nodo nuevo inicia
@@ -53,7 +57,8 @@ public class AlgoritmoBerkeley {
      */
     public void calcularY(){
         //Tolerancia de 1 minuto
-        y = 2*obtenerLatenciaMax()*60;
+        y = 2*obtenerLatenciaMax()*TIMETOLERA;
+        System.out.println("Nuevo tiempo Y (Milisegundos): "+y);
     }
     
     /**
@@ -80,9 +85,23 @@ public class AlgoritmoBerkeley {
      * Obtiene la latencia ente la computadora actual y al especificada en la ip
      * @param ip computadora a la cual se va a calcular la latencia
      * @return latencia en segundos
+     * 
+     * Estado: Hay que preguntarle al profe :v
      */
     public int calcularLatencia(InetAddress ip){
-        return 1;
+        long a,b;
+        a = System.currentTimeMillis();
+        try {
+            if(!ip.isReachable(5000)){
+                System.out.println("No se puede llegar a la ip");
+                return -1;
+            }  
+        } catch (IOException ex) {
+            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        b = System.currentTimeMillis();
+        System.out.println("Latencia = "+(b-a));
+        return (int)(b-a);
     }
     
     /**
@@ -148,7 +167,7 @@ public class AlgoritmoBerkeley {
                             InetAddress ia = cl.getInetAddress();
                             BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                             //Encapsular información
-                            Equipo e = new Equipo(ia.getHostAddress(), br.readLine(), calcularLatencia(ia));
+                            Equipo e = new Equipo(ia.getHostAddress(), br.readLine(), (int)calcularLatencia(ia));
                             //Guardar en la BD  y asignar su Id al objeto
                             e.setId(con.registrarEquipo(e));
                             //Agregar a equipos
