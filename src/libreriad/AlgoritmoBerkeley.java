@@ -36,7 +36,7 @@ public class AlgoritmoBerkeley {
     /**
      * Lista de todos los equipos que se han conectado al servidor
      */
-    ArrayList<Equipo> equipos = new ArrayList<Equipo>();
+    public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
     final static int ptoBer = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
     final static int ptoNvo = 2071; //Puerto definido para cuando un nodo nuevo inicia
     ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/      INSERTE NOMBRE DE LA BASE DE DATOS      "); //Objeto para usar la base de datos
@@ -112,15 +112,22 @@ public class AlgoritmoBerkeley {
     /**
      * Obtiene la latencia más grande de los equipos de la variable global "equipos" (en segundos)
      * @return latencia mas grande
+     * 
+     * Estado: completado
      */
     public int obtenerLatenciaMax(){
-        return 2;
+        int m=0, l=0;
+        for(Equipo e: equipos){
+            l = e.getLatencia();
+            if(l>m) m = l;
+        }
+        return m;
     }
     
     /**
      * Hilo encargado de escuchar constantemente nodos nuevos por el número de puerto ptoNvo <br>
      * Cuando llega una trama nueva <br>
-     * 1.-Se obtiene la IP, el nombre y la latencia; esta última se obtiene de {@link #calcularLatencia(java.lang.String) } <br>
+     * 1.-Se obtiene la IP, el nombre y la latencia; esta última se obtiene de {@link #calcularLatencia(java.net.InetAddress)  } <br>
      * 2.-Se encapsula lo anterior en un objeto de tipo Equipo <br>
      * 3.-Se guarda en la base de datos y se asigna su ID a el mismo objeto usando el método int registrarEquipo(Equipo e) <br>
      * PE: {@code equipo.setId(registrarEquipo(equipo));} <br>

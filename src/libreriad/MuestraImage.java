@@ -113,30 +113,31 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         return new Runnable(){
             @Override
             public void run(){
-                try{
-                    while(true){
-                        //Si es el coordinador principal, detiene el hilo, checa esto cada 2 minutos
-                        while(elsujeto != name && elsujeto != -1){
-                            //System.out.println("Enviando latido <3");
-                            //Nodo principal
-                            InetAddress coordinador = InetAddress.getByName(maq+elsujeto);
-                            //Comprobar que esta muerto
-                            if(!stillAlive(coordinador)){
-                                System.out.println("El coordinado..... AH MUERTO!");
-                                elsujeto = -1;
-                                procesando = true;
-                                timeToDuel();
-                            }
-                            //El latido se hace cada 5 min
-                            Thread.sleep(5000);
+                while(true){
+                    try{
+                    //Si es el coordinador principal, detiene el hilo, checa esto cada 2 minutos
+                    while(elsujeto != name && elsujeto != -1){
+                        //System.out.println("Enviando latido <3");
+                        //Nodo principal
+                        InetAddress coordinador = InetAddress.getByName(maq+elsujeto);
+                        //Comprobar que esta muerto
+                        if(!stillAlive(coordinador)){
+                            System.out.println("El coordinado..... AH MUERTO!");
+                            elsujeto = -1;
+                            procesando = true;
+                            timeToDuel();
                         }
-                        //Para que no gaste muchos recursos
-                        System.out.println("Hilo de beat apagado");
-                        Thread.sleep(60*1000);
+                        //El latido se hace cada 5 min
+                        Thread.sleep(5000);
                     }
-                }catch(Exception ex){
-                    System.out.println("Error en el hilo de latido "+ex);
+                    //Para que no gaste muchos recursos
+                    System.out.println("Hilo de beat apagado");
+                    Thread.sleep(60*1000);
+                    }catch(Exception ex){
+                        System.out.println("Error en el hilo de latido "+ex);
+                    }
                 }
+                
             }
         };
     }
