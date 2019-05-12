@@ -7,9 +7,8 @@ import java.util.Comparator;
 public class Host {
     public static void main(String[] args) {
         try{
-            /*AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
-            ab.hiloEscuchaEquipos();*/
-            AlgoritmoBerkeley.presentarse();
+            AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
+            ab.hiloEscuchaEquipos();
             
         }
         

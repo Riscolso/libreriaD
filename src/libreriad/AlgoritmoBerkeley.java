@@ -37,10 +37,10 @@ public class AlgoritmoBerkeley {
      * Lista de todos los equipos que se han conectado al servidor
      */
     public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
-    final static int ptoBer = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
-    final static int ptoNvo = 2071; //Puerto definido para cuando un nodo nuevo inicia
+    final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
+    final static int PTONVO = 2071; //Puerto definido para cuando un nodo nuevo inicia
     ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/      INSERTE NOMBRE DE LA BASE DE DATOS      "); //Objeto para usar la base de datos
-    final static String ipServ = "localhost"; //Dirección ip del servidor de tiempo
+    final static String IPSERV = "localhost"; //Dirección ip del servidor de tiempo
     public AlgoritmoBerkeley(){
         
     }
@@ -141,13 +141,14 @@ public class AlgoritmoBerkeley {
                 @Override
                 public void run(){
                     try {
-                        ServerSocket s = new ServerSocket(ptoNvo);
+                        ServerSocket s = new ServerSocket(PTONVO);
+                        System.out.println("Servidor de escucha equipos iniciado...");
                         while(true){
-                            System.out.println("Servidor de escucha equipos iniciado...");
                             Socket cl= s.accept();
                             InetAddress ia = cl.getInetAddress();
+                            BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                             //Encapsular información
-                            Equipo e = new Equipo(ia.getHostAddress(), ia.getHostName(), calcularLatencia(ia));
+                            Equipo e = new Equipo(ia.getHostAddress(), br.readLine(), calcularLatencia(ia));
                             //Guardar en la BD  y asignar su Id al objeto
                             e.setId(con.registrarEquipo(e));
                             //Agregar a equipos
@@ -174,6 +175,7 @@ public class AlgoritmoBerkeley {
     /*------------------------------------------ CÓDIGO PARA LOS NODOS ------------------------------------------------*/
     /**
      * Enviar una trama a el servidor de tiempo, usando la ip ipServ y el puerto ptoNvo <br>
+     * Se envía el nombre de la PC ya que este no se puede obtener en el servidor <br>
      * El mensaje puede ser el que sea <br>
      * Recibe una trama y muestra en consola que se ha registrado con el servidor de tiempo
      * 
@@ -182,9 +184,10 @@ public class AlgoritmoBerkeley {
     public static void presentarse(){
         try{
             //Crear el socket
-            Socket cl = new Socket(ipServ,ptoNvo);
+            Socket cl = new Socket(IPSERV,PTONVO);
             PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-            pw.println("Alo polisia?");
+            //Obtener el nombre de la máquina
+            pw.println(InetAddress.getLocalHost().getHostName());
             pw.flush();
             //Cerramos los flujos, el socket y terminamos el programa
             pw.close();
@@ -210,7 +213,7 @@ public class AlgoritmoBerkeley {
                 @Override
                 public void run(){
                     try {
-                        ServerSocket s = new ServerSocket(ptoBer);
+                        ServerSocket s = new ServerSocket(PTOBER);
                         while(true){
                             System.out.println("Servidor de escucha hora iniciado...");
                             Socket cl= s.accept();
