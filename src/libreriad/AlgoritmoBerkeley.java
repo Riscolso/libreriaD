@@ -40,7 +40,7 @@ public class AlgoritmoBerkeley {
     final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
     final static int PTONVO = 2071; //Puerto definido para cuando un nodo nuevo inicia
     ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/      INSERTE NOMBRE DE LA BASE DE DATOS      "); //Objeto para usar la base de datos
-    final static String IPSERV = "localhost"; //Dirección ip del servidor de tiempo
+    final static String IPSERV = "192.168.1.67"; //Dirección ip del servidor de tiempo
     public AlgoritmoBerkeley(){
         
     }
@@ -49,7 +49,7 @@ public class AlgoritmoBerkeley {
      * Calcula el tiempo (en segundos) de retardo entre los ciclos de sincronización de hora 2PS (P=latencia máxima,S=Tolerancia) <br>
      * Obtener P de {@link #obtenerLatenciaMax() } <br>
      * S es al gusto
-     * Completado.
+     * Estado: Completado.
      */
     public void calcularY(){
         //Tolerancia de 1 minuto
@@ -134,7 +134,7 @@ public class AlgoritmoBerkeley {
      * 4.-Agregar el objeto con id, ip, nombre y latencia a la variable global "equipos" <br>
      * 5.-Llamar el método {@link #calcularY() } <br>
      * 
-     * Estado: En pruebas con nombre de IP
+     * Estado: Completado
      */
     public void hiloEscuchaEquipos(){
         Thread t = new Thread(new Runnable(){
