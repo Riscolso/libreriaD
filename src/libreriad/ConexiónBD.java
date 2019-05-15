@@ -297,9 +297,33 @@ public class ConexiónBD {
     * @return ArrayList [&#8249;]Equipo[&#8250;] Todos los equipos de la base de datos
     */
     public ArrayList<Equipo> obtenerEquipos(){
-        //Borrar la línea de abajo
-        return new ArrayList<Equipo>();
+        ArrayList<Equipo> equipos = new ArrayList<Equipo>();
+        Connection con = getConnection();
+        PreparedStatement ps=null;
+        ResultSet rs;
+        Equipo e;
+            try{
+                ps = con.prepareStatement("SELECT*FROM Equipos");
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    e = new Equipo(
+                        rs.getString("IP"),
+                        rs.getString("Nombre"),
+                        rs.getInt("Latencia")
+                    );
+                    equipos.add(e);
+                }
+            }catch(SQLException ex){
+                System.out.println(ex);
+            }
+        return equipos;
     }
+    // Con un for obtener datos de todos alv 
+    /* 
+     for(int i = 0; i < con.obtenerEquipos().size();i++){
+            System.out.println("Información: "+con.obtenerEquipos().get(i).getIp()+", "+con.obtenerEquipos().get(i).getNombre());   
+       }
+    */
     
     /**
     * Registra un equipo en la base de datos y regresa su id de la BD
@@ -307,10 +331,42 @@ public class ConexiónBD {
     * @return El Id asignado a el equipo recien registrado en la BD
     */
     public int registrarEquipo(Equipo e){
-        return 1;
+        Connection con = getConnection();
+        String ins= "INSERT INTO Equipos (IP, Nombre, Latencia) VALUES (?,?,?)";
+        PreparedStatement ps;
+        try{
+            ps=con.prepareStatement(ins);
+            ps.setString(1, e.getIp());
+            ps.setString(2, e.getNombre());
+            ps.setInt(3, e.getLatencia());
+            ps.executeUpdate();
+            System.out.println("Equipo guardado, ggg.");
+        }catch(Exception ex){
+            System.out.println("Error al guardar Equipo, ggg salu2.");
+            System.out.println(ex);
+        }
+
+        return e.getId();
     }
     
-    
+    //Metodo que regresa el ID con base al metodo de arribita, ggg salu2.
+    public int idEquipo(String nombre){
+        Connection con = getConnection();
+        PreparedStatement ps;
+        ResultSet rs;
+        int id=0;
+        try {
+            ps = con.prepareStatement("SELECT ID FROM Equipos WHERE Nombre=?");
+            ps.setString(1, nombre);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                id = rs.getInt("ID");
+            }
+        } catch (SQLException ex) {
+                System.err.println(ex);
+        }
+        return id;
+    }
     
     /**
      * Registra en las tablas HoraCentral y Hora equipos los parametros dados
