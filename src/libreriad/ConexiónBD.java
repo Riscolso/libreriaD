@@ -378,10 +378,7 @@ public class ConexiónBD {
     
     //Se reciben los parámetros correspondientes, una vez que entra el Map, se regresa la llave y el valor para esos mismos 
     //llevarlos a la base de datos en un UPDATE ggg.
-    public void registrarHora(int hp, int hr, ArrayList<HoraEquipo> hes){
-//            Iterator regresa = idyhorEqui.keySet().iterator();
-//            Integer key = (Integer) regresa.next();
-//            String val = idyhorEqui.get(key);
+    public void registrarHorea(int hp, int hr, ArrayList<HoraEquipo> hes){
 //            Connection con = getConnection();
 //            
 //            String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
@@ -400,19 +397,27 @@ public class ConexiónBD {
 //            Logger.getLogger(ConexiónBD.class.getName()).log(Level.SEVERE, null, ex);
 //        }
     }
-    
-    
-}
-
-class HoraEquipo {
-    int IDEquipo;
-    String hEquipo;
-    int adelantar, relentizar;
-
-    public HoraEquipo(int IDEquipo, String hEquipo, int adelantar, int relentizar) {
-        this.IDEquipo = IDEquipo;
-        this.hEquipo = hEquipo;
-        this.adelantar = adelantar;
-        this.relentizar = relentizar;
+    public void registrarHora(int hp, int hr, ArrayList<HoraEquipo> hes){
+        Connection con = getConnection();
+        
+        String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
+        try{
+            Statement ps = con.createStatement();
+            ps.addBatch(ins);
+            for(int x=0;x<hes.size();x++){
+            ps.addBatch("INSERT INTO HoraEquipos"
+                    + "(IDhSincr, IDEquipo, hEquipo, aEquipo, ralentizar) "
+                    + "SELECT HoraCentral.ID, "+hes.get(x).getIDEquipo()+", "+"'"+hes.get(x).gethEquipo()+"'"+", "
+                    + ""+hes.get(x).getAdelantar()+", "+hes.get(x).getRelentizar()+" "
+                    + "FROM HoraCentral");    
+            }
+            ps.executeBatch();
+        }catch(SQLException ex){
+            System.out.println(ex);
+        }
+        
     }
+    
 }
+
+
