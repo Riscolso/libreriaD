@@ -11,8 +11,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
@@ -318,8 +320,7 @@ public class ConexiónBD {
             }
         return equipos;
     }
-    // Con un for obtener datos de todos alv 
-    /* 
+    /*  Con un for obtener datos de todos alv 
      for(int i = 0; i < con.obtenerEquipos().size();i++){
             System.out.println("Información: "+con.obtenerEquipos().get(i).getIp()+", "+con.obtenerEquipos().get(i).getNombre());   
        }
@@ -377,8 +378,30 @@ public class ConexiónBD {
      * @param rel tiempo que se retrasó el reloj (en segundos)
      * @see <a href="https://jarroba.com/map-en-java-con-ejemplos" > HasMaps </a> para saber como obtener los datos de la dupla
      */
+    
+    //Se reciben los parámetros correspondientes, una vez que entra el Map, se regresa la llave y el valor para esos mismos 
+    //llevarlos a la base de datos en un UPDATE ggg.
     public void registrarHora(int hp, int hr, Map<Integer, String> idyhorEqui, int ad, int rel){
-        
+            Iterator regresa = idyhorEqui.keySet().iterator();
+            Integer key = (Integer) regresa.next();
+            String val = idyhorEqui.get(key);
+            Connection con = getConnection();
+            
+            String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
+            String ins2 = "INSERT INTO HoraEquipos (IDhSincr) SELECT ID FROM HoraCentral WHERE hPrev="+hp+" AND hRef="+hr+" ";
+            String ins3 = "UPDATE HoraEquipos SET IDEquipo="+key+", hEquipo="+"'"+val+"'"+", aEquipo="+ad+", ralentizar="+rel+" "
+                    + "WHERE IDhSincr = (SELECT ID FROM HoraCentral "
+                    + "WHERE hPrev="+hp+" AND hRef="+hr+")";
+            System.out.println(ins3);
+        try {
+            Statement ps = con.createStatement();
+            ps.addBatch(ins);
+            ps.addBatch(ins2);
+            ps.addBatch(ins3);
+            ps.executeBatch();
+        } catch (SQLException ex) {
+            Logger.getLogger(ConexiónBD.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     
