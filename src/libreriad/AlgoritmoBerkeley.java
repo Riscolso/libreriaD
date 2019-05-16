@@ -157,6 +157,7 @@ public class AlgoritmoBerkeley {
                 @Override
                 public void run(){
                     while(true){
+                        int t=0, c=0; //C es un contador que indica cuantos equipos se usaron
                         for(Equipo e : equipos){
                             try {
                                 Socket cl = new Socket(e.getIp(),PTOBER);
@@ -168,7 +169,8 @@ public class AlgoritmoBerkeley {
                                 int time = timeASeg(hora); //Tiempo del servidor
                                 //Discriminar por hora de referencia
                                 if(timeE<time+TIMEREF && timeE>time-TIMEREF){
-                                    
+                                    t+=t;
+                                    c++;
                                 }
                                 else System.out.println("Se discriminó la hora del equipo "+e.getNombre());
                                 PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
