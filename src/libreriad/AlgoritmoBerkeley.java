@@ -40,6 +40,11 @@ public class AlgoritmoBerkeley {
      * Tiempo de tolerancia para obtener Y en milisegundos
      */
     final int TIMETOLERA  = 60*1000;
+    /**
+     * Tiempo de referencia para discriminar horas (En segundos)
+     * 24 minutos
+     */
+    final int TIMEREF = 24*60;
     public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
     final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
     final static int PTONVO = 2071; //Puerto definido para cuando un nodo nuevo inicia
@@ -62,13 +67,26 @@ public class AlgoritmoBerkeley {
     }
     
     /**
-     * Pide la hora de todos los equipos; las ips se obtienen del arreglo "equipos"
-     * @return Areeglo de enteros con las horas de los equipos
+     * Pide la hora a los equipos; las ips se obtienen del arreglo "equipos"
+     * @return Hora de la PC
      */
-    public ArrayList<String> pedirHora(){
-        ArrayList<String> horas = new ArrayList<String>();
-        return horas;
-    }
+    /*public String pedirHora(String ip){
+        try {
+            //Crear el socket
+            Socket cl = new Socket(ip,PTOBER);
+            BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
+            System.out.println("Hora recibida "+br2.readLine());
+            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+            //Obtener el nombre de la máquina
+            pw.println(ajuste+"");
+            pw.flush();
+            //Cerramos los flujos, el socket y terminamos el programa
+            pw.close();
+            cl.close();
+        } catch (IOException ex) {
+            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }*/
     
     /**
      * Envia la nueva hora y su valor de ajuste a un equipo especificada <br>
@@ -76,16 +94,14 @@ public class AlgoritmoBerkeley {
      * Debe ser un String con la forma "5" 0 "-3"
      * @param ip Dirección del equipo al que se va a enviar 
      * @param ajuste Que tanto debe de adelantarse(cantidad) o relentizarse(-cantidad) el reloj del nodo (en segundos)
+     * 
      */
     public void enviaHora(String ip, int ajuste){
         try {
             //Crear el socket
             Socket cl = new Socket(ip,PTOBER);
             BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
-            
-            //Leemos el mensaje recibido 
-            String mensaje= br2.readLine();
-            System.out.println("Mensaje recibido "+mensaje);
+            System.out.println("Hora recibida "+br2.readLine());
             PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
             //Obtener el nombre de la máquina
             pw.println(ajuste+"");
@@ -99,26 +115,30 @@ public class AlgoritmoBerkeley {
     }
     
     /**
-     * Obtiene la latencia ente la computadora actual y al especificada en la ip
+     * Obtiene la latencia ente la computadora actual y la especificada en la ip
+     * Lo hace 3 veces y obtiene el promedio
      * @param ip computadora a la cual se va a calcular la latencia
      * @return latencia en segundos
      * 
-     * Estado: Hay que preguntarle al profe :v
+     * Estado: Pruebas
      */
     public int calcularLatencia(InetAddress ip){
-        long a,b;
-        a = System.currentTimeMillis();
-        try {
-            if(!ip.isReachable(5000)){
-                System.out.println("No se puede llegar a la ip");
-                return -1;
-            }  
-        } catch (IOException ex) {
-            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+        long a,b, t=0;
+        for(int i=0;i<3;i++){
+            a = System.currentTimeMillis();
+            try {
+                if(!ip.isReachable(5000)){
+                    System.out.println("No se puede llegar a la ip");
+                    return -1;
+                }  
+            } catch (IOException ex) {
+                Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            b = System.currentTimeMillis();
+            t += b-a;
         }
-        b = System.currentTimeMillis();
-        System.out.println("Latencia = "+(b-a));
-        return (int)(b-a);
+        System.out.println("Latencia = "+t/3);
+        return (int)t/3;
     }
     
     /**
@@ -133,16 +153,54 @@ public class AlgoritmoBerkeley {
      * 5.-Esperar "y" segundos y vuelve a empezar <br>
      */
     public void berkeley(){
-        
-            /*Thread t = new Thread(new Runnable(){
-            @Override
-            public void run(){
-            while(true){
+        Thread t = new Thread(new Runnable(){
+                @Override
+                public void run(){
+                    while(true){
+                        for(Equipo e : equipos){
+                            try {
+                                Socket cl = new Socket(e.getIp(),PTOBER);
+                                BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
+                                String msj = br.readLine();
+                                System.out.println("Hora recibida "+msj);
+                                //Convertir la cadena a segundos
+                                int timeE = timeASeg(msj); //Tiempo del equipo
+                                int time = timeASeg(hora); //Tiempo del servidor
+                                //Discriminar por hora de referencia
+                                if(timeE<time+TIMEREF && timeE>time-TIMEREF){
+                                    
+                                }
+                                else System.out.println("Se discriminó la hora del equipo "+e.getNombre());
+                                PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                                pw.println("");
+                                pw.flush();
+                                //Cerramos los flujos, el socket y terminamos el programa
+                                pw.close();
+                                cl.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+                                System.out.println("Error al enviar hora a equipo "+e.getNombre());
+                            }
+                        }
+                        Socket cl = new Socket();
+                        //Thread.sleep(y);
+                    }
+                }
             }
-            }
-            }
-            );
-            t.start();*/
+        );
+        t.start();
+    }
+    
+    /**
+     * Convierte una cadena de formato "hh:mm:ss" a un entero con los segundos totales
+     * @param tiempo cadena en formato "hh:mm:ss"
+     * @return Cantidad de segundos que hay en la hora especificada
+     */
+    public int timeASeg(String tiempo){
+        int seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
+        int min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
+        int hor = Integer.parseInt(tiempo.substring(0,2));
+        return seg*min*hor;
     }
     
     /**
