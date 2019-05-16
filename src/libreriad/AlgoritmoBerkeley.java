@@ -120,7 +120,6 @@ public class AlgoritmoBerkeley {
                 @Override
                 public void run(){
                     while(true){
-                        
                     }
                 }
             }

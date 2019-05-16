@@ -373,36 +373,46 @@ public class ConexiónBD {
      * Registra en las tablas HoraCentral y Hora equipos los parametros dados
      * @param hp hPrev de Hora central
      * @param hr hRef de Horal central
-     * @param idyhorEqui Mapa hash ("arreglo") con la dupla de Id del equipo y su hora, IDEquipo y h equipo de la tabla Hora equipos 
-     * @param ad tiempo que se adelantó el reloj (en segundos)
-     * @param rel tiempo que se retrasó el reloj (en segundos)
-     * @see <a href="https://jarroba.com/map-en-java-con-ejemplos" > HasMaps </a> para saber como obtener los datos de la dupla
+     * @param hes Lista de objetos con los valores de ID, hora y relentizar/adelantar de los equipos
      */
     
     //Se reciben los parámetros correspondientes, una vez que entra el Map, se regresa la llave y el valor para esos mismos 
     //llevarlos a la base de datos en un UPDATE ggg.
-    public void registrarHora(int hp, int hr, Map<Integer, String> idyhorEqui, int ad, int rel){
-            Iterator regresa = idyhorEqui.keySet().iterator();
-            Integer key = (Integer) regresa.next();
-            String val = idyhorEqui.get(key);
-            Connection con = getConnection();
-            
-            String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
-            String ins2 = "INSERT INTO HoraEquipos (IDhSincr) SELECT ID FROM HoraCentral WHERE hPrev="+hp+" AND hRef="+hr+" ";
-            String ins3 = "UPDATE HoraEquipos SET IDEquipo="+key+", hEquipo="+"'"+val+"'"+", aEquipo="+ad+", ralentizar="+rel+" "
-                    + "WHERE IDhSincr = (SELECT ID FROM HoraCentral "
-                    + "WHERE hPrev="+hp+" AND hRef="+hr+")";
-            System.out.println(ins3);
-        try {
-            Statement ps = con.createStatement();
-            ps.addBatch(ins);
-            ps.addBatch(ins2);
-            ps.addBatch(ins3);
-            ps.executeBatch();
-        } catch (SQLException ex) {
-            Logger.getLogger(ConexiónBD.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public void registrarHora(int hp, int hr, ArrayList<HoraEquipo> hes){
+//            Iterator regresa = idyhorEqui.keySet().iterator();
+//            Integer key = (Integer) regresa.next();
+//            String val = idyhorEqui.get(key);
+//            Connection con = getConnection();
+//            
+//            String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
+//            String ins2 = "INSERT INTO HoraEquipos (IDhSincr) SELECT ID FROM HoraCentral WHERE hPrev="+hp+" AND hRef="+hr+" ";
+//            String ins3 = "UPDATE HoraEquipos SET IDEquipo="+key+", hEquipo="+"'"+val+"'"+", aEquipo="+ad+", ralentizar="+rel+" "
+//                    + "WHERE IDhSincr = (SELECT ID FROM HoraCentral "
+//                    + "WHERE hPrev="+hp+" AND hRef="+hr+")";
+//            System.out.println(ins3);
+//        try {
+//            Statement ps = con.createStatement();
+//            ps.addBatch(ins);
+//            ps.addBatch(ins2);
+//            ps.addBatch(ins3);
+//            ps.executeBatch();
+//        } catch (SQLException ex) {
+//            Logger.getLogger(ConexiónBD.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
     
     
+}
+
+class HoraEquipo {
+    int IDEquipo;
+    String hEquipo;
+    int adelantar, relentizar;
+
+    public HoraEquipo(int IDEquipo, String hEquipo, int adelantar, int relentizar) {
+        this.IDEquipo = IDEquipo;
+        this.hEquipo = hEquipo;
+        this.adelantar = adelantar;
+        this.relentizar = relentizar;
+    }
 }
