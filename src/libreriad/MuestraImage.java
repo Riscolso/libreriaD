@@ -73,7 +73,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     public static int segundero[];
     //Número de libros disponibles para distribuir
     private int noLibros;
-    private static boolean on[];
+    public static boolean on[];
     ModReloj mr;
     Thread  hilo[];
     int i;
@@ -863,7 +863,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                 BRelojes[e].setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
                                 Thread.sleep(segundero[e]);
                             }
-                        System.out.println();
+                        System.out.print("");
                         }
                         } catch (Exception ex) {
                             System.out.println("Error en hilo "+e+": "+ex);
@@ -1062,7 +1062,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         noLibros=con.obtenerLibros();
         lbLibros.setText("Libros disponibles: "+ noLibros);
         //Activar el AlgoritmoBerkeley
-        AlgoritmoBerkeley.presentarse();
+        //AlgoritmoBerkeley.presentarse();
         AlgoritmoBerkeley.hiloEscuchaHora();
     }
 

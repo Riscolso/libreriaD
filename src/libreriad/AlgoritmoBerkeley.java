@@ -80,7 +80,7 @@ public class AlgoritmoBerkeley {
     public void enviaHora(String ip, int ajuste){
         try {
             //Crear el socket
-            Socket cl = new Socket(IPSERV,PTOBER);
+            Socket cl = new Socket(ip,PTOBER);
             BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
             
             //Leemos el mensaje recibido 
@@ -88,7 +88,7 @@ public class AlgoritmoBerkeley {
             System.out.println("Mensaje recibido "+mensaje);
             PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
             //Obtener el nombre de la máquina
-            pw.println("-3");
+            pw.println(ajuste+"");
             pw.flush();
             //Cerramos los flujos, el socket y terminamos el programa
             pw.close();
@@ -242,7 +242,7 @@ public class AlgoritmoBerkeley {
      * 4.-Muestra en consola lo recibido <br>
      * 5.-Reletiza (ZA WARUDO TOKI WA TOMARE!) o adelanta la hora (viaja en el tiempo) <br>
      * 
-     * Estado: En pruebas
+     * Estado: Completo
      */
     public static void hiloEscuchaHora(){
         Thread t = new Thread(new Runnable(){
@@ -270,13 +270,13 @@ public class AlgoritmoBerkeley {
                             if(ajuste<0){
                                 ajuste*=-1;
                                 System.out.println("ZA WARUDO TOKI WO TOMARE! ");
-                                MuestraImage.setTime(msj, 0, 0, false);
+                                MuestraImage.on[0]=false;
                                 try {
                                     Thread.sleep(ajuste*1000);
                                 } catch (InterruptedException ex) {
                                     Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                                 }
-                                MuestraImage.setTime(msj, 0, 1000, false);
+                                MuestraImage.on[0]=true;
                                 System.out.println("Toki wa ugoki dasu");
                             }
                             //Adelantar el reloj
@@ -284,23 +284,26 @@ public class AlgoritmoBerkeley {
                                 int seg = Integer.parseInt(msj.substring(msj.lastIndexOf(":")+1));
                                 int min = Integer.parseInt(msj.substring(msj.indexOf(":")+1,msj.lastIndexOf(":")));
                                 int hor = Integer.parseInt(msj.substring(0,2));
-                                if(seg+ajuste <59) seg += ajuste;
+                                if(seg+ajuste <60) seg += ajuste;
                                 else{
-                                    if(min<59){
+                                    if(min+1<60){
                                         min++;
-                                        seg -= ajuste; 
+                                        seg = ajuste-(60-seg);
                                     }
                                     else{
                                         min = 0;
-                                        if(hor<23){
+                                        if(hor+1<24){
                                             hor++;
-                                            seg -= ajuste;
+                                            seg = ajuste-(60-seg);
                                         }
-                                        else hor=0;
+                                        else{
+                                            hor=0;
+                                            seg = ajuste-(60-seg);
+                                        }
                                     }
                                 }
                                 String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
-                                System.out.println("El nuevo tiempo es :"+time);
+                                System.out.println("El nuevo tiempo es "+time);
                                 MuestraImage.setTime(time, 0, 1000, false);
                             }
                             br.close();
