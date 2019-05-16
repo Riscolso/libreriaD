@@ -5,6 +5,8 @@ public class Equipo {
     private String nombre;
     private int  latencia; //En milisegundos
     private int id;
+    private String hEquipo;
+    private int adelantar, relentizar;
     
     public Equipo(){
         
@@ -14,6 +16,30 @@ public class Equipo {
         this.ip = ip;
         this.nombre = nombre;
         this.latencia = latencia;
+    }
+
+    public String gethEquipo() {
+        return hEquipo;
+    }
+
+    public void sethEquipo(String hEquipo) {
+        this.hEquipo = hEquipo;
+    }
+
+    public int getAdelantar() {
+        return adelantar;
+    }
+
+    public void setAdelantar(int adelantar) {
+        this.adelantar = adelantar;
+    }
+
+    public int getRelentizar() {
+        return relentizar;
+    }
+
+    public void setRelentizar(int relentizar) {
+        this.relentizar = relentizar;
     }
     
     /**

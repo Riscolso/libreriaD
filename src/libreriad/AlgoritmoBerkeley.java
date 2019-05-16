@@ -1,4 +1,3 @@
-//Cuidado en donde poner los try-catch dentro de los ciclos infinitos
 package libreriad;
 
 import java.io.BufferedReader;
@@ -20,15 +19,15 @@ import static libreriad.MuestraImage.cadenaDig;
 * código de los nodos del sistema distribuido. <br>
 * Todo lo demás esta pensado para usarse en el Servidor de Tiempo
 * @author  Equipo 3 RULEZ
-* @version 0.0
+* @version 1.0
 * @since   2019-04-05
 */
 
 public class AlgoritmoBerkeley {
     /**
-     * La hora buena
+     * El tiempo bueno
      */
-    String hora;
+    String tiempo;
     /**
      * Cada cuando se debe sincronizar la hora en milisegundos
      */
@@ -68,35 +67,39 @@ public class AlgoritmoBerkeley {
     
     /**
      * Pide la hora a los equipos; las ips se obtienen del arreglo "equipos"
-     * @return Hora de la PC
+     * @return Arreglo de objetos de equipos con horas listas
+     * 
+     * Estado: En pruebas
      */
-    /*public String pedirHora(String ip){
-        try {
-            //Crear el socket
-            Socket cl = new Socket(ip,PTOBER);
-            BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
-            System.out.println("Hora recibida "+br2.readLine());
-            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-            //Obtener el nombre de la máquina
-            pw.println(ajuste+"");
-            pw.flush();
-            //Cerramos los flujos, el socket y terminamos el programa
-            pw.close();
-            cl.close();
-        } catch (IOException ex) {
-            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+    public ArrayList<Equipo> pedirHoras(){
+        ArrayList<Equipo> aux = new ArrayList<Equipo>();
+        for(Equipo e : equipos){
+            try {
+                Socket cl = new Socket(e.getIp(),PTOBER);
+                BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
+                String msj = br.readLine();
+                System.out.println("Hora recibida "+msj);
+                Equipo ea = e;
+                ea.sethEquipo(msj);
+                aux.add(e);
+            } catch (IOException ex) {
+                Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Error al recibir la hora de equipo "+e.getNombre());
+            }
         }
-    }*/
+        return aux;
+    }
     
     /**
-     * Envia la nueva hora y su valor de ajuste a un equipo especificada <br>
-     * La trama se envía a ip con el puerto ptoBer
-     * Debe ser un String con la forma "5" 0 "-3"
+     * Envia el valor de ajuste a un equipo especificado <br>
+     * La trama se envía a ip con el puerto ptoBer <br>
+     * Debe ser un String con la forma "5" 0 "-3" 
      * @param ip Dirección del equipo al que se va a enviar 
      * @param ajuste Que tanto debe de adelantarse(cantidad) o relentizarse(-cantidad) el reloj del nodo (en segundos)
      * 
+     * Estado: En pruebas
      */
-    public void enviaHora(String ip, int ajuste){
+    public void enviaAjuste(String ip, int ajuste){
         try {
             //Crear el socket
             Socket cl = new Socket(ip,PTOBER);
@@ -120,7 +123,7 @@ public class AlgoritmoBerkeley {
      * @param ip computadora a la cual se va a calcular la latencia
      * @return latencia en segundos
      * 
-     * Estado: Pruebas
+     * Estado: Completo
      */
     public int calcularLatencia(InetAddress ip){
         long a,b, t=0;
@@ -151,6 +154,8 @@ public class AlgoritmoBerkeley {
      * @see <a href="https://jarroba.com/map-en-java-con-ejemplos"> Maps </a> Para información sobre como usar los mapHash
      * 6.-Actualizar la variable global hora <br>
      * 5.-Esperar "y" segundos y vuelve a empezar <br>
+     * 
+     * Estado: En pruebas - base de datos
      */
     public void berkeley(){
         Thread t = new Thread(new Runnable(){
@@ -158,34 +163,34 @@ public class AlgoritmoBerkeley {
                 public void run(){
                     while(true){
                         int t=0, c=0; //C es un contador que indica cuantos equipos se usaron
-                        for(Equipo e : equipos){
-                            try {
-                                Socket cl = new Socket(e.getIp(),PTOBER);
-                                BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
-                                String msj = br.readLine();
-                                System.out.println("Hora recibida "+msj);
-                                //Convertir la cadena a segundos
-                                int timeE = timeASeg(msj); //Tiempo del equipo
-                                int time = timeASeg(hora); //Tiempo del servidor
-                                //Discriminar por hora de referencia
-                                if(timeE<time+TIMEREF && timeE>time-TIMEREF){
-                                    t+=t;
-                                    c++;
-                                }
-                                else System.out.println("Se discriminó la hora del equipo "+e.getNombre());
-                                PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-                                pw.println("");
-                                pw.flush();
-                                //Cerramos los flujos, el socket y terminamos el programa
-                                pw.close();
-                                cl.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
-                                System.out.println("Error al enviar hora a equipo "+e.getNombre());
+                        ArrayList<Equipo> es = pedirHoras();
+                        for(Equipo e : es){
+                            int timeE = timeASeg(e.gethEquipo()); //Tiempo del equipo
+                            int time = timeASeg(tiempo); //Tiempo del servidor
+                            //Discriminar por hora de referencia
+                            if(timeE<time+TIMEREF && timeE>time-TIMEREF){
+                                t+=t;
+                                c++;
                             }
+                            else System.out.println("Se discriminó la hora del equipo "+e.getNombre());
                         }
-                        Socket cl = new Socket();
-                        //Thread.sleep(y);
+                        //Calcular el promedio
+                        int prom = t/c;
+                        //Calcular y enviar el ajuste de cada equipo
+                        for(Equipo e : es){
+                            int timeE = timeASeg(e.gethEquipo());
+                            enviaAjuste(e.getIp(),prom-timeE);
+                        }
+                        //Registrar en la BD
+                        //con.registrarHora(tiempo,segATime(prom), es);
+                        //Nueva hora
+                        tiempo = segATime(prom);
+                        //Esperar
+                        try {
+                            Thread.sleep(y);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
             }
@@ -202,7 +207,19 @@ public class AlgoritmoBerkeley {
         int seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
         int min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
         int hor = Integer.parseInt(tiempo.substring(0,2));
-        return seg*min*hor;
+        return seg+(60*min)+(60*60*hor);
+    }
+    
+    /**
+     * Convierte una cantidad de segundos a tiempo de forma "hh:mm:ss"
+     * @param s cantidad de segundos
+     * @return tiempo
+     */
+    public String segATime(int s){
+        int hor = s/(3600);
+        int min = s%(3600)/60;
+        int seg = s%60;
+        return cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
     }
     
     /**
@@ -302,7 +319,7 @@ public class AlgoritmoBerkeley {
      * 4.-Muestra en consola lo recibido <br>
      * 5.-Reletiza (ZA WARUDO TOKI WA TOMARE!) o adelanta la hora (viaja en el tiempo) <br>
      * 
-     * Estado: Completo
+     * Estado: Separar la acción de enviar hora y recibir ajuste
      */
     public static void hiloEscuchaHora(){
         Thread t = new Thread(new Runnable(){
@@ -316,7 +333,6 @@ public class AlgoritmoBerkeley {
                             System.out.println("Alguien me pidió la hora");
                             //Enviando la hora
                             String msj = MuestraImage.r1.getText();
-                            //String msj = "01:01:09";
                             PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
                             pw.println(msj);
                             pw.flush();

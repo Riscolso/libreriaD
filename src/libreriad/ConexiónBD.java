@@ -376,7 +376,7 @@ public class ConexiónBD {
      * @param hes Lista de objetos con los valores de ID, hora y relentizar/adelantar de los equipos
      */
     
-    public void registrarHora(int hp, int hr, ArrayList<HoraEquipo> hes){
+    public void registrarHora(String hp, String hr, ArrayList<Equipo> hes){
         Connection con = getConnection();
         
         String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
@@ -386,7 +386,7 @@ public class ConexiónBD {
             for(int x=0;x<hes.size();x++){
             ps.addBatch("INSERT INTO HoraEquipos"
                     + "(IDhSincr, IDEquipo, hEquipo, aEquipo, ralentizar) "
-                    + "SELECT HoraCentral.ID, "+hes.get(x).getIDEquipo()+", "+"'"+hes.get(x).gethEquipo()+"'"+", "
+                    + "SELECT HoraCentral.ID, "+hes.get(x).getId()+", "+"'"+hes.get(x).gethEquipo()+"'"+", "
                     + ""+hes.get(x).getAdelantar()+", "+hes.get(x).getRelentizar()+" "
                     + "FROM HoraCentral "
                     + "WHERE HoraCentral.hPrev="+hp+" "
