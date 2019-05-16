@@ -1,5 +1,9 @@
 package libreriad;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
 * <h1>Servidor de tiempo</h1>
 * Se encarga de sincronizar el reloj entre los nodos del sistema distribuido
@@ -16,7 +20,12 @@ public class ServidorTiempo {
     
     public ServidorTiempo(){
         ab = new AlgoritmoBerkeley();
+        //Asignar tiempo a el servidor
+        Date date = new Date();
+        DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
+        ab.tiempo = hourFormat.format(date);
+        System.out.println("El tiempo es: "+ab.tiempo);
         ab.hiloEscuchaEquipos();
-        //ab.berkeley();
+        ab.berkeley();
     }
 }

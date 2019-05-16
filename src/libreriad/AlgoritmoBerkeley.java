@@ -76,6 +76,9 @@ public class AlgoritmoBerkeley {
         for(Equipo e : equipos){
             try {
                 Socket cl = new Socket(e.getIp(),PTOBER);
+                PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                //Envíar una p al servidor hace que este responda con su hora
+                pw.println("p");
                 BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                 String msj = br.readLine();
                 System.out.println("Hora recibida "+msj);
@@ -185,6 +188,7 @@ public class AlgoritmoBerkeley {
                         //con.registrarHora(tiempo,segATime(prom), es);
                         //Nueva hora
                         tiempo = segATime(prom);
+                        System.out.println("La nueva hora es "+tiempo);
                         //Esperar
                         try {
                             Thread.sleep(y);

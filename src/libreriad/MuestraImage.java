@@ -1062,7 +1062,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         noLibros=con.obtenerLibros();
         lbLibros.setText("Libros disponibles: "+ noLibros);
         //Activar el AlgoritmoBerkeley
-        //AlgoritmoBerkeley.presentarse();
+        AlgoritmoBerkeley.presentarse();
         AlgoritmoBerkeley.hiloEscuchaHora();
     }
 
