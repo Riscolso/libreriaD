@@ -78,7 +78,24 @@ public class AlgoritmoBerkeley {
      * @param ajuste Que tanto debe de adelantarse(cantidad) o relentizarse(-cantidad) el reloj del nodo (en segundos)
      */
     public void enviaHora(String ip, int ajuste){
-        
+        try {
+            //Crear el socket
+            Socket cl = new Socket(IPSERV,PTOBER);
+            BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
+            
+            //Leemos el mensaje recibido 
+            String mensaje= br2.readLine();
+            System.out.println("Mensaje recibido "+mensaje);
+            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+            //Obtener el nombre de la máquina
+            pw.println("-3");
+            pw.flush();
+            //Cerramos los flujos, el socket y terminamos el programa
+            pw.close();
+            cl.close();
+        } catch (IOException ex) {
+            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     /**
@@ -116,15 +133,16 @@ public class AlgoritmoBerkeley {
      * 5.-Esperar "y" segundos y vuelve a empezar <br>
      */
     public void berkeley(){
-        Thread t = new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    while(true){
-                    }
-                }
+        
+            /*Thread t = new Thread(new Runnable(){
+            @Override
+            public void run(){
+            while(true){
             }
-        );
-        t.start();
+            }
+            }
+            );
+            t.start();*/
     }
     
     /**
@@ -242,7 +260,7 @@ public class AlgoritmoBerkeley {
                             PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
                             pw.println(msj);
                             pw.flush();
-                            //Recibiendo la hora
+                            //Recibiendo el ajuste
                             BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                             int ajuste = Integer.parseInt(br.readLine());
                             System.out.println("Se recibió "+ ajuste);

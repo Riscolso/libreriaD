@@ -108,6 +108,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     
     public static boolean procesando = false;
     
+    AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
+    
     /*----------------------------------Código algoritmo anillo--------------------------------*/
     public Runnable beat(){
         return new Runnable(){
@@ -1059,6 +1061,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         }
         noLibros=con.obtenerLibros();
         lbLibros.setText("Libros disponibles: "+ noLibros);
+        //Activar el AlgoritmoBerkeley
+        AlgoritmoBerkeley.presentarse();
+        AlgoritmoBerkeley.hiloEscuchaHora();
     }
 
     @SuppressWarnings("unchecked")
