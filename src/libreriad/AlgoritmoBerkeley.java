@@ -312,14 +312,14 @@ public class AlgoritmoBerkeley {
     }
     
     /**
-     * Hilo encargado de recibir peticiones del servidor de tiempo por el puerto ptoBer <br>
-     * 1.-Recibe la petición de hora <br>
-     * 2.-Envía la hora actual <br>
-     * 3.-Recibe una trama con un String de tipo "5" o "-3" <br>
-     * 4.-Muestra en consola lo recibido <br>
-     * 5.-Reletiza (ZA WARUDO TOKI WA TOMARE!) o adelanta la hora (viaja en el tiempo) <br>
+     * Hilo encargado de recibir peticiones o ajustes del servidor de tiempo por el puerto ptoBer <br>
+     * -Recibe la petición de hora <br>
+     * -Envía la hora actual <br>
+     * -Recibe un ajuste con un String de tipo "5" o "-3" <br>
+     * -Muestra en consola lo recibido <br>
+     * -Reletiza (ZA WARUDO TOKI WA TOMARE!) o adelanta la hora (viaja en el tiempo) <br>
      * 
-     * Estado: Separar la acción de enviar hora y recibir ajuste
+     * Estado: Pruebas
      */
     public static void hiloEscuchaHora(){
         Thread t = new Thread(new Runnable(){
@@ -330,61 +330,67 @@ public class AlgoritmoBerkeley {
                         while(true){
                             System.out.println("Servidor de escucha hora iniciado...");
                             Socket cl= s.accept();
-                            System.out.println("Alguien me pidió la hora");
-                            //Enviando la hora
-                            String msj = MuestraImage.r1.getText();
-                            PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-                            pw.println(msj);
-                            pw.flush();
-                            //Recibiendo el ajuste
                             BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
-                            int ajuste = Integer.parseInt(br.readLine());
-                            System.out.println("Se recibió "+ ajuste);
-                            //Volver a obtener el tiempo
-                            msj = MuestraImage.r1.getText();
-                            //Relentizar el tiempo
-                            if(ajuste<0){
-                                ajuste*=-1;
-                                System.out.println("ZA WARUDO TOKI WO TOMARE! ");
-                                MuestraImage.on[0]=false;
-                                try {
-                                    Thread.sleep(ajuste*1000);
-                                } catch (InterruptedException ex) {
-                                    Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                MuestraImage.on[0]=true;
-                                System.out.println("Toki wa ugoki dasu");
+                            String aux = br.readLine();
+                            //Si se esta pidiendo la hora
+                            if(aux == "p"){
+                                System.out.println("Alguien me pidió la hora");
+                                //Enviando la hora
+                                PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+                                pw.println(MuestraImage.r1.getText());
+                                pw.flush();
+                                pw.close();
                             }
-                            //Adelantar el reloj
-                            else if (ajuste>0){
-                                int seg = Integer.parseInt(msj.substring(msj.lastIndexOf(":")+1));
-                                int min = Integer.parseInt(msj.substring(msj.indexOf(":")+1,msj.lastIndexOf(":")));
-                                int hor = Integer.parseInt(msj.substring(0,2));
-                                if(seg+ajuste <60) seg += ajuste;
-                                else{
-                                    if(min+1<60){
-                                        min++;
-                                        seg = ajuste-(60-seg);
+                            //Si se esta recibiendo un ajuste
+                            else{
+                                //Recibiendo el ajuste
+                                int ajuste = Integer.parseInt(aux);
+                                System.out.println("Se recibió "+ ajuste);
+                                //Obtener el tiempo
+                                String msj = MuestraImage.r1.getText();
+                                //Relentizar el tiempo
+                                if(ajuste<0){
+                                    ajuste*=-1;
+                                    System.out.println("ZA WARUDO TOKI WO TOMARE! ");
+                                    MuestraImage.on[0]=false;
+                                    try {
+                                        Thread.sleep(ajuste*1000);
+                                    } catch (InterruptedException ex) {
+                                        Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                                     }
+                                    MuestraImage.on[0]=true;
+                                    System.out.println("Toki wa ugoki dasu");
+                                }
+                                //Adelantar el reloj
+                                else if (ajuste>0){
+                                    int seg = Integer.parseInt(msj.substring(msj.lastIndexOf(":")+1));
+                                    int min = Integer.parseInt(msj.substring(msj.indexOf(":")+1,msj.lastIndexOf(":")));
+                                    int hor = Integer.parseInt(msj.substring(0,2));
+                                    if(seg+ajuste <60) seg += ajuste;
                                     else{
-                                        min = 0;
-                                        if(hor+1<24){
-                                            hor++;
+                                        if(min+1<60){
+                                            min++;
                                             seg = ajuste-(60-seg);
                                         }
                                         else{
-                                            hor=0;
-                                            seg = ajuste-(60-seg);
+                                            min = 0;
+                                            if(hor+1<24){
+                                                hor++;
+                                                seg = ajuste-(60-seg);
+                                            }
+                                            else{
+                                                hor=0;
+                                                seg = ajuste-(60-seg);
+                                            }
                                         }
                                     }
+                                    String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
+                                    System.out.println("El nuevo tiempo es "+time);
+                                    MuestraImage.setTime(time, 0, 1000, false);
                                 }
-                                String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
-                                System.out.println("El nuevo tiempo es "+time);
-                                MuestraImage.setTime(time, 0, 1000, false);
+                                br.close();
+                                cl.close();
                             }
-                            br.close();
-                            pw.close();
-                            cl.close();
                         }
                     } catch (IOException ex) {
                         System.out.println("Error en hilo escucha equipos ");
