@@ -376,27 +376,6 @@ public class ConexiónBD {
      * @param hes Lista de objetos con los valores de ID, hora y relentizar/adelantar de los equipos
      */
     
-    //Se reciben los parámetros correspondientes, una vez que entra el Map, se regresa la llave y el valor para esos mismos 
-    //llevarlos a la base de datos en un UPDATE ggg.
-    public void registrarHorea(int hp, int hr, ArrayList<HoraEquipo> hes){
-//            Connection con = getConnection();
-//            
-//            String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
-//            String ins2 = "INSERT INTO HoraEquipos (IDhSincr) SELECT ID FROM HoraCentral WHERE hPrev="+hp+" AND hRef="+hr+" ";
-//            String ins3 = "UPDATE HoraEquipos SET IDEquipo="+key+", hEquipo="+"'"+val+"'"+", aEquipo="+ad+", ralentizar="+rel+" "
-//                    + "WHERE IDhSincr = (SELECT ID FROM HoraCentral "
-//                    + "WHERE hPrev="+hp+" AND hRef="+hr+")";
-//            System.out.println(ins3);
-//        try {
-//            Statement ps = con.createStatement();
-//            ps.addBatch(ins);
-//            ps.addBatch(ins2);
-//            ps.addBatch(ins3);
-//            ps.executeBatch();
-//        } catch (SQLException ex) {
-//            Logger.getLogger(ConexiónBD.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
     public void registrarHora(int hp, int hr, ArrayList<HoraEquipo> hes){
         Connection con = getConnection();
         
@@ -409,13 +388,14 @@ public class ConexiónBD {
                     + "(IDhSincr, IDEquipo, hEquipo, aEquipo, ralentizar) "
                     + "SELECT HoraCentral.ID, "+hes.get(x).getIDEquipo()+", "+"'"+hes.get(x).gethEquipo()+"'"+", "
                     + ""+hes.get(x).getAdelantar()+", "+hes.get(x).getRelentizar()+" "
-                    + "FROM HoraCentral");    
+                    + "FROM HoraCentral "
+                    + "WHERE HoraCentral.hPrev="+hp+" "
+                    + "AND HoraCentral.hRef="+hr+"");    
             }
             ps.executeBatch();
         }catch(SQLException ex){
             System.out.println(ex);
-        }
-        
+        }   
     }
     
 }
