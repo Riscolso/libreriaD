@@ -31,7 +31,7 @@ public class AlgoritmoBerkeley {
     /**
      * Cada cuando se debe sincronizar la hora en milisegundos
      */
-    int y;
+    int y = 1000*60;
     /**
      * Lista de todos los equipos que se han conectado al servidor
      */
@@ -62,7 +62,7 @@ public class AlgoritmoBerkeley {
     public void calcularY(){
         //Tolerancia de 1 minuto
         y = 2*obtenerLatenciaMax()*TIMETOLERA;
-        System.out.println("Nuevo tiempo Y (Milisegundos): "+y);
+        System.out.println("Nuevo tiempo Y (Milisegundos): "+y+" +osea" + segATime(y));
     }
     
     /**
@@ -79,6 +79,7 @@ public class AlgoritmoBerkeley {
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
                 //Envíar una p al servidor hace que este responda con su hora
                 pw.println("p");
+                pw.flush();
                 BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                 String msj = br.readLine();
                 System.out.println("Hora recibida "+msj);
@@ -106,8 +107,6 @@ public class AlgoritmoBerkeley {
         try {
             //Crear el socket
             Socket cl = new Socket(ip,PTOBER);
-            BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
-            System.out.println("Hora recibida "+br2.readLine());
             PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
             //Obtener el nombre de la máquina
             pw.println(ajuste+"");
@@ -165,36 +164,42 @@ public class AlgoritmoBerkeley {
                 @Override
                 public void run(){
                     while(true){
-                        int t=0, c=0; //C es un contador que indica cuantos equipos se usaron
-                        ArrayList<Equipo> es = pedirHoras();
-                        for(Equipo e : es){
-                            int timeE = timeASeg(e.gethEquipo()); //Tiempo del equipo
-                            int time = timeASeg(tiempo); //Tiempo del servidor
-                            //Discriminar por hora de referencia
-                            if(timeE<time+TIMEREF && timeE>time-TIMEREF){
-                                t+=t;
-                                c++;
+                        if(equipos.size()!=0){
+                            int t=0, c=0; //C es un contador que indica cuantos equipos se usaron
+                            ArrayList<Equipo> es = pedirHoras();
+                            for(Equipo e : es){
+                                int timeE = timeASeg(e.gethEquipo()); //Tiempo del equipo
+                                int time = timeASeg(tiempo); //Tiempo del servidor
+                                //Discriminar por hora de referencia
+                                if(timeE<time+TIMEREF && timeE>time-TIMEREF){
+                                    t+=timeE;
+                                    System.out.println("Valor de t: "+t);
+                                    c++;
+                                    //System.out.println("Valor de c: "+c);
+                                }
+                                else System.out.println("Se discriminó la hora del equipo "+e.getNombre());
                             }
-                            else System.out.println("Se discriminó la hora del equipo "+e.getNombre());
+                            //Calcular el promedio
+                            int prom = t/c;
+                            System.out.println("El promedio es "+prom);
+                            //Calcular y enviar el ajuste de cada equipo
+                            for(Equipo e : es){
+                                int timeE = timeASeg(e.gethEquipo());
+                                enviaAjuste(e.getIp(),prom-timeE);
+                            }
+                            //Registrar en la BD
+                            //con.registrarHora(tiempo,segATime(prom), es);
+                            //Nueva hora
+                            tiempo = segATime(prom);
+                            System.out.println("La nueva hora es "+tiempo);
                         }
-                        //Calcular el promedio
-                        int prom = t/c;
-                        //Calcular y enviar el ajuste de cada equipo
-                        for(Equipo e : es){
-                            int timeE = timeASeg(e.gethEquipo());
-                            enviaAjuste(e.getIp(),prom-timeE);
-                        }
-                        //Registrar en la BD
-                        //con.registrarHora(tiempo,segATime(prom), es);
-                        //Nueva hora
-                        tiempo = segATime(prom);
-                        System.out.println("La nueva hora es "+tiempo);
                         //Esperar
                         try {
                             Thread.sleep(y);
                         } catch (InterruptedException ex) {
                             Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                         }
+                        System.out.println("Sigo");
                     }
                 }
             }
@@ -251,7 +256,7 @@ public class AlgoritmoBerkeley {
      * 4.-Agregar el objeto con id, ip, nombre y latencia a la variable global "equipos" <br>
      * 5.-Llamar el método {@link #calcularY() } <br>
      * 
-     * Estado: Completado
+     * Estado: Completado - Desbloquear BD
      */
     public void hiloEscuchaEquipos(){
         Thread t = new Thread(new Runnable(){
@@ -267,14 +272,14 @@ public class AlgoritmoBerkeley {
                             //Encapsular información
                             Equipo e = new Equipo(ia.getHostAddress(), br.readLine(), (int)calcularLatencia(ia));
                             //Guardar en la BD  y asignar su Id al objeto
-                            e.setId(con.registrarEquipo(e));
+                            //e.setId(con.registrarEquipo(e));
                             //Agregar a equipos
                             equipos.add(e);
                             //Imprimir datos
                             System.out.println("Se encontró un nuevo nodo, guadado en la base de datos");
                             e.imprimirEquipo();
                             //Calcular el nuevo tiempo de retraso para sincronización
-                            calcularY();
+                            //calcularY();
                             //Cerrar flujos
                             cl.close();
                         }
@@ -336,8 +341,9 @@ public class AlgoritmoBerkeley {
                             Socket cl= s.accept();
                             BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                             String aux = br.readLine();
+                            System.out.println("Recibí "+aux);
                             //Si se esta pidiendo la hora
-                            if(aux == "p"){
+                            if(aux.equals("p")){
                                 System.out.println("Alguien me pidió la hora");
                                 //Enviando la hora
                                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
