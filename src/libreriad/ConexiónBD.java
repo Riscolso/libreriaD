@@ -380,7 +380,7 @@ public class ConexiónBD {
     public void registrarHora(String hp, String hr, ArrayList<Equipo> hes){
         Connection con = getConnection();
         
-        String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+hp+","+hr+")";
+        String ins = "INSERT INTO HoraCentral (hPrev, hRef) VALUES ("+"'"+hp+"'"+","+"'"+hr+"'"+")";
         try{
             Statement ps = con.createStatement();
             ps.addBatch(ins);
@@ -390,8 +390,8 @@ public class ConexiónBD {
                     + "SELECT HoraCentral.ID, "+hes.get(x).getId()+", "+"'"+hes.get(x).gethEquipo()+"'"+", "
                     + ""+hes.get(x).getAdelantar()+", "+hes.get(x).getRelentizar()+" "
                     + "FROM HoraCentral "
-                    + "WHERE HoraCentral.hPrev="+hp+" "
-                    + "AND HoraCentral.hRef="+hr+"");    
+                    + "WHERE HoraCentral.hPrev="+"'"+hp+"'"+" "
+                    + "AND HoraCentral.hRef="+"'"+hr+"'"+"");    
             }
             ps.executeBatch();
         }catch(SQLException ex){
