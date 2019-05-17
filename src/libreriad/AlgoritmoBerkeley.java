@@ -62,7 +62,7 @@ public class AlgoritmoBerkeley {
     public void calcularY(){
         //Tolerancia de 1 minuto
         y = 2*obtenerLatenciaMax()*TIMETOLERA;
-        System.out.println("Nuevo tiempo Y (Milisegundos): "+y+" +osea" + segATime(y));
+        System.out.println("Nuevo tiempo Y (Milisegundos): "+y+" osea cada" + y/1000*60+" minutos");
     }
     
     /**
@@ -198,6 +198,8 @@ public class AlgoritmoBerkeley {
                                 enviaAjuste(e.getIp(),ajuste);
                             }
                             //Registrar en la BD
+                            System.out.println("Base de datos tiempo: "+tiempo);
+                            System.out.println("SegATIME "+segATime(prom));
                             con.registrarHora(tiempo,segATime(prom), es);
                             //Nueva hora
                             tiempo = segATime(prom);
@@ -291,7 +293,7 @@ public class AlgoritmoBerkeley {
                                 System.out.println("Se encontró un nuevo nodo, guadado en la base de datos");
                                 e.imprimirEquipo();
                                 //Calcular el nuevo tiempo de retraso para sincronización
-                                calcularY();
+                                //calcularY();
                                 //Cerrar flujos
                                 cl.close();
                             }

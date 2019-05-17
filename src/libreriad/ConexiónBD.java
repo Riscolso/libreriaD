@@ -365,6 +365,7 @@ public class ConexiónBD {
             }
         } catch (SQLException ex) {
                 System.err.println(ex);
+                ex.printStackTrace();
         }
         return id;
     }
@@ -395,6 +396,7 @@ public class ConexiónBD {
             ps.executeBatch();
         }catch(SQLException ex){
             System.out.println(ex);
+            ex.printStackTrace();
         }   
     }
     
