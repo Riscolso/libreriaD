@@ -101,7 +101,7 @@
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
-                          <Component id="lbLibros" min="-2" max="-2" attributes="0"/>
+                          <Component id="lbLibros" min="-2" pref="38" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                           <Component id="btnReIni" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="132" max="-2" attributes="0"/>
@@ -145,7 +145,7 @@
                               <Component id="btnReIni" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="jSalir" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lbLibros" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lbLibros" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace pref="27" max="32767" attributes="0"/>
@@ -219,6 +219,9 @@
         <Component class="javax.swing.JTextField" name="jIdLibro">
         </Component>
         <Component class="javax.swing.JLabel" name="jMuestraLibro">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="jSalir">
           <Properties>
@@ -342,8 +345,14 @@
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lbLibros">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JTextField" name="jNomLibro">
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="btncor">
           <Properties>

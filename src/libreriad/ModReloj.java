@@ -2,6 +2,8 @@ package libreriad;
 
 import java.awt.Image;
 import java.awt.Toolkit;
+import static libreriad.Reloj.setTime;
+
 
 
 public class ModReloj extends javax.swing.JFrame {
@@ -145,7 +147,7 @@ public class ModReloj extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         //Establecer la nueva hora
-        MuestraImage.setTime(cadenaDig(hor.getValue().toString())+":"
+        setTime(cadenaDig(hor.getValue().toString())+":"
                 +cadenaDig(min.getValue().toString())+":"
                 +cadenaDig(seg.getValue().toString()), noReloj, Integer.parseInt(segundero.getValue()+""), false);
         //Ocultar la ventana

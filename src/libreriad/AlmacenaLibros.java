@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.sql.Connection;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -27,18 +26,10 @@ import java.util.logging.Logger;
 public class AlmacenaLibros extends javax.swing.JFrame implements Serializable{
     ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/libreria");
     String ruta;
-    //Necesario para el RMI 
-    Registry registry;
     
     public AlmacenaLibros() {
         initComponents();
         setLocationRelativeTo(this);
-        try {
-            registry = LocateRegistry.getRegistry("192.168.1.79", 1099);
-            //también puedes usar getRegistry(String host, int port)
-        } catch (RemoteException ex) {
-            Logger.getLogger(AlmacenaLibros.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     /**
@@ -304,14 +295,6 @@ public class AlmacenaLibros extends javax.swing.JFrame implements Serializable{
         //Guardar en la base de datos
         con.almacenaDatos(l);
         
-        //Guardar en la base de datos de respaldo
-        try {  
-	    Respaldo stub = (Respaldo) registry.lookup("res");
-	    stub.guardarLibro(l);
-	} catch (Exception e) {
-	    System.err.println("Excepción del cliente: " + e.toString());
-	    e.printStackTrace();
-	}
         
     }//GEN-LAST:event_jGuardaLActionPerformed
 

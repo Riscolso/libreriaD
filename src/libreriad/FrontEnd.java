@@ -8,20 +8,15 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static libreriad.RelojUsuario.setTime;
+import static libreriad.AlgoritmoAnillo.stillAlive;
+import static libreriad.AlgoritmoAnillo.MAQ;
 
 public class FrontEnd {
     public static int elsujeto = -1;
@@ -29,7 +24,7 @@ public class FrontEnd {
     public int buscarElSujeto() throws UnknownHostException{
         //Va a tratar de conectar a un coordinador, tolerancia de hasta 2 muertos
         for(int i=1;i<4;i++){
-            if(MuestraImage.stillAlive(InetAddress.getByName(MuestraImage.maq+i))){
+            if(stillAlive(InetAddress.getByName(MAQ+i))){
                 elsujeto = i;
                 return i;
             }
@@ -43,12 +38,9 @@ public class FrontEnd {
     public boolean chismoso() throws UnknownHostException, IOException{
         //Tolerancia de 3 nodos 
         for(int i=elsujeto;i<4;i++){
-            InetAddress dir = InetAddress.getByName(MuestraImage.maq+i);
-            if(MuestraImage.stillAlive(dir)){
+            InetAddress dir = InetAddress.getByName(MAQ+i);
+            if(stillAlive(dir)){
                 Socket cl = new Socket(dir, 2068);
-                PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-                pw.println("Ey, psss, se cayó el principal"); //En realidad ni siquiera lee el mensaje :v
-                pw.flush();
                 //Va a esperar hasta que la elección acabe 
                 BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                 String mensaje = br2.readLine();
@@ -65,7 +57,7 @@ public class FrontEnd {
     Si no, inicia la votación en los nodos secundarios y manda */
     public String peticion() throws UnknownHostException, IOException{
         //Si el coordinador al que apunta esta muerto se escoge uno nuevo
-        if(!MuestraImage.stillAlive(InetAddress.getByName(MuestraImage.maq+elsujeto))){
+        if(!stillAlive(InetAddress.getByName(MAQ+elsujeto))){
             //Si se escogió un nuevo coordinador
             if(chismoso()) return pedirLibro();
             //Si ya no hay ninguno
@@ -109,7 +101,7 @@ public class FrontEnd {
     }
     
     public String pedirLibro() throws UnknownHostException, IOException{
-        Socket cl= new Socket(InetAddress.getByName(MuestraImage.maq+elsujeto),1234);
+        Socket cl= new Socket(InetAddress.getByName(MAQ+elsujeto),1234);
         //Hacemos una petición
         PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
         pw.println("Dame libro >:v");
