@@ -47,7 +47,7 @@ public class AlgoritmoBerkeley {
     public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
     final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
     final static int PTONVO = 2071; //Puerto definido para cuando un nodo nuevo inicia
-    ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/      INSERTE NOMBRE DE LA BASE DE DATOS      "); //Objeto para usar la base de datos
+    ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/relojd"); //Objeto para usar la base de datos
     final static String IPSERV = "192.168.1.67"; //Dirección ip del servidor de tiempo
     public AlgoritmoBerkeley(){
         
@@ -76,13 +76,14 @@ public class AlgoritmoBerkeley {
         for(Equipo e : equipos){
             try {
                 Socket cl = new Socket(e.getIp(),PTOBER);
+                cl.setSoTimeout(10000);//Tienen 10 seg para contestar o hay tabla
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
                 //Envíar una p al servidor hace que este responda con su hora
                 pw.println("p");
                 pw.flush();
                 BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                 String msj = br.readLine();
-                System.out.println("Hora recibida "+msj);
+                //System.out.println("Hora recibida "+msj);
                 Equipo ea = e;
                 ea.sethEquipo(msj);
                 aux.add(e);
@@ -115,7 +116,8 @@ public class AlgoritmoBerkeley {
             pw.close();
             cl.close();
         } catch (IOException ex) {
-            Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error "+ex);
+            System.out.println("No se pudo enviar el ajuste a "+ip);
         }
     }
     
@@ -142,7 +144,7 @@ public class AlgoritmoBerkeley {
             b = System.currentTimeMillis();
             t += b-a;
         }
-        System.out.println("Latencia = "+t/3);
+        //System.out.println("Latencia = "+t/3);
         return (int)t/3;
     }
     
@@ -169,13 +171,11 @@ public class AlgoritmoBerkeley {
                             int t=0, c=0; //C es un contador que indica cuantos equipos se usaron
                             ArrayList<Equipo> es = pedirHoras();
                             for(Equipo e : es){
-                                int timeE = timeASeg(e.gethEquipo()); //Tiempo del equipo
+                                int timeE = timeASeg(e.gethEquipo())+(e.getLatencia()/2); //Tiempo del equipo
                                 //Discriminar por hora de referencia
                                 if(timeE<time+TIMEREF && timeE>time-TIMEREF){
                                     t+=timeE;
-                                    System.out.println("Valor de t: "+t);
                                     c++;
-                                    //System.out.println("Valor de c: "+c);
                                 }
                                 else{
                                     System.out.println("Se discriminó la hora del equipo "+e.getNombre());
@@ -183,11 +183,10 @@ public class AlgoritmoBerkeley {
                             }
                             //Calcular el promedio
                             int prom = t/c;
-                            System.out.println("El promedio es "+prom);
                             //Calcular y enviar el ajuste de cada equipo
                             for(Equipo e : es){
                                 int timeE = timeASeg(e.gethEquipo());
-                                int ajuste = prom-timeE;
+                                int ajuste = (prom+(e.getLatencia()/2))-timeE;
                                 e.setAdelantar(0);
                                 e.setRelentizar(0);
                                 if(ajuste<0){
@@ -199,7 +198,7 @@ public class AlgoritmoBerkeley {
                                 enviaAjuste(e.getIp(),ajuste);
                             }
                             //Registrar en la BD
-                            //con.registrarHora(tiempo,segATime(prom), es);
+                            con.registrarHora(tiempo,segATime(prom), es);
                             //Nueva hora
                             tiempo = segATime(prom);
                             System.out.println("La nueva hora es "+tiempo);
@@ -210,7 +209,7 @@ public class AlgoritmoBerkeley {
                         } catch (InterruptedException ex) {
                             Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        System.out.println("Sigo");
+                        System.out.print("");
                     }
                 }
             }
@@ -285,14 +284,14 @@ public class AlgoritmoBerkeley {
                             if(!contieneNombre(aux)){
                                 Equipo e = new Equipo(ia.getHostAddress(), aux, (int)calcularLatencia(ia));
                                 //Guardar en la BD  y asignar su Id al objeto
-                                //e.setId(con.registrarEquipo(e));
+                                e.setId(con.registrarEquipo(e));
                                 //Agregar a equipos
                                 equipos.add(e);
                                 //Imprimir datos
                                 System.out.println("Se encontró un nuevo nodo, guadado en la base de datos");
                                 e.imprimirEquipo();
                                 //Calcular el nuevo tiempo de retraso para sincronización
-                                //calcularY();
+                                calcularY();
                                 //Cerrar flujos
                                 cl.close();
                             }
@@ -342,8 +341,7 @@ public class AlgoritmoBerkeley {
             pw.close();
             cl.close();
         }catch(Exception e){
-            System.out.println("Error enviando presentación");
-            e.printStackTrace();
+            System.out.println("Error enviando presentación "+e);
         }
     }
     
@@ -353,7 +351,7 @@ public class AlgoritmoBerkeley {
      * -Envía la hora actual <br>
      * -Recibe un ajuste con un String de tipo "5" o "-3" <br>
      * -Muestra en consola lo recibido <br>
-     * -Reletiza (ZA WARUDO TOKI WA TOMARE!) o adelanta la hora (viaja en el tiempo) <br>
+     * -Reletiza o adelanta la hora (viaja en el tiempo) <br>
      * 
      * Estado: Pruebas
      */
@@ -363,15 +361,13 @@ public class AlgoritmoBerkeley {
                 public void run(){
                     try {
                         ServerSocket s = new ServerSocket(PTOBER);
+                        System.out.println("Servidor de escucha hora iniciado...");
                         while(true){
-                            System.out.println("Servidor de escucha hora iniciado...");
                             Socket cl= s.accept();
                             BufferedReader br = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                             String aux = br.readLine();
-                            System.out.println("Recibí "+aux);
                             //Si se esta pidiendo la hora
                             if(aux.equals("p")){
-                                System.out.println("Alguien me pidió la hora");
                                 //Enviando la hora
                                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
                                 pw.println(MuestraImage.r1.getText());
@@ -388,11 +384,11 @@ public class AlgoritmoBerkeley {
                                 //Relentizar el tiempo
                                 if(ajuste<0){
                                     ajuste*=-1;
-                                    System.out.println("ZA WARUDO TOKI WO TOMARE! ");
-                                    //Relentelizar al 50%
-                                    MuestraImage.setTime(msj, 0, 1000*2, true);
+                                    System.out.println("ZA WARUDO TOKI WO TOMARE!");
+                                    //Relentelizar al 25%
+                                    MuestraImage.setTime(msj, 0, 1000*4, true);
                                     try {
-                                        Thread.sleep(ajuste*2*1000);
+                                        Thread.sleep(ajuste*4*1000);
                                     } catch (InterruptedException ex) {
                                         Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                                     }

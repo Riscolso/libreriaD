@@ -37,7 +37,6 @@ CREATE TABLE `equipos` (
 
 LOCK TABLES `equipos` WRITE;
 /*!40000 ALTER TABLE `equipos` DISABLE KEYS */;
-INSERT INTO `equipos` VALUES (1,'10.100.12.100','Rodos',10),(2,'10.100.12.100','Rodos',10);
 /*!40000 ALTER TABLE `equipos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -62,7 +61,6 @@ CREATE TABLE `horacentral` (
 
 LOCK TABLES `horacentral` WRITE;
 /*!40000 ALTER TABLE `horacentral` DISABLE KEYS */;
-INSERT INTO `horacentral` VALUES (1,'1','1931');
 /*!40000 ALTER TABLE `horacentral` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -94,7 +92,6 @@ CREATE TABLE `horaequipos` (
 
 LOCK TABLES `horaequipos` WRITE;
 /*!40000 ALTER TABLE `horaequipos` DISABLE KEYS */;
-INSERT INTO `horaequipos` VALUES (1,1,1,'s',1,8),(2,1,2,'h',2,9),(3,1,2,'q',3,7),(4,1,1,'j',4,5);
 /*!40000 ALTER TABLE `horaequipos` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

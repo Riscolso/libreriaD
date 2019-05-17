@@ -822,6 +822,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         on = new boolean[4];
         hilo = new Thread[4];
         
+        //Obtener la hora local para el primer reloj
+        Date date = new Date();
+        DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
+        BRelojes[0].setText(hourFormat.format(date));
+        
 
         for(i=0;i<4;i++){
             //Todos los relojes online disponibles
@@ -876,11 +881,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             hilo[i].start();
             
         }
-        
-        //Obtener la hora local para el primer reloj
-        Date date = new Date();
-        DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
-        setTime(hourFormat.format(date)+"", 0, 1000, false);
         
         //Asignar hora random a los demás relojes
         for(int j=1;j<4;j++)
