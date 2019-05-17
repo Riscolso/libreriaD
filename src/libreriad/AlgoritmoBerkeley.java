@@ -57,7 +57,7 @@ public class AlgoritmoBerkeley {
      * Calcula el tiempo (en segundos) de retardo entre los ciclos de sincronización de hora 2PS (P=latencia máxima,S=Tolerancia) <br>
      * Obtener P de {@link #obtenerLatenciaMax() } <br>
      * S es al gusto
-     * Estado: Completado.
+     * Estado: Completo
      */
     public void calcularY(){
         //Tolerancia de 1 minuto
@@ -69,7 +69,7 @@ public class AlgoritmoBerkeley {
      * Pide la hora a los equipos; las ips se obtienen del arreglo "equipos"
      * @return Arreglo de objetos de equipos con horas listas
      * 
-     * Estado: En pruebas
+     * Estado: Completo
      */
     public ArrayList<Equipo> pedirHoras(){
         ArrayList<Equipo> aux = new ArrayList<Equipo>();
@@ -88,8 +88,8 @@ public class AlgoritmoBerkeley {
                 ea.sethEquipo(msj);
                 aux.add(e);
             } catch (IOException ex) {
-                Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("Error al recibir la hora de equipo "+e.getNombre());
+                //Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Error al recibir la hora de equipo, igual y esta apagado "+e.getNombre());
             }
         }
         return aux;
@@ -102,7 +102,7 @@ public class AlgoritmoBerkeley {
      * @param ip Dirección del equipo al que se va a enviar 
      * @param ajuste Que tanto debe de adelantarse(cantidad) o relentizarse(-cantidad) el reloj del nodo (en segundos)
      * 
-     * Estado: En pruebas
+     * Estado: Completo
      */
     public void enviaAjuste(String ip, int ajuste){
         try {
@@ -159,7 +159,7 @@ public class AlgoritmoBerkeley {
      * 6.-Actualizar la variable global hora <br>
      * 5.-Esperar "y" segundos y vuelve a empezar <br>
      * 
-     * Estado: En pruebas - base de datos
+     * Estado: Completo
      */
     public void berkeley(){
         Thread t = new Thread(new Runnable(){
@@ -270,7 +270,7 @@ public class AlgoritmoBerkeley {
      * 4.-Agregar el objeto con id, ip, nombre y latencia a la variable global "equipos" <br>
      * 5.-Llamar el método {@link #calcularY() } <br>
      * 
-     * Estado: Completado - Desbloquear BD
+     * Estado: Completado
      */
     public void hiloEscuchaEquipos(){
         Thread t = new Thread(new Runnable(){
@@ -295,7 +295,7 @@ public class AlgoritmoBerkeley {
                                 System.out.println("Se encontró un nuevo nodo, guadado en la base de datos");
                                 e.imprimirEquipo();
                                 //Calcular el nuevo tiempo de retraso para sincronización
-                                //calcularY();
+                                calcularY();
                                 //Cerrar flujos
                                 cl.close();
                             }
@@ -357,7 +357,7 @@ public class AlgoritmoBerkeley {
      * -Muestra en consola lo recibido <br>
      * -Reletiza o adelanta la hora (viaja en el tiempo) <br>
      * 
-     * Estado: Pruebas
+     * Estado: Completo
      */
     public static void hiloEscuchaHora(){
         Thread t = new Thread(new Runnable(){
@@ -390,9 +390,9 @@ public class AlgoritmoBerkeley {
                                     ajuste*=-1;
                                     System.out.println("ZA WARUDO TOKI WO TOMARE!");
                                     //Relentelizar al 25%
-                                    MuestraImage.setTime(msj, 0, 1000*4, true);
+                                    MuestraImage.setTime(msj, 0, 1000*2, true);
                                     try {
-                                        Thread.sleep(ajuste*4*1000);
+                                        Thread.sleep(ajuste*2*1000);
                                     } catch (InterruptedException ex) {
                                         Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                                     }
