@@ -171,7 +171,8 @@ public class AlgoritmoBerkeley {
                             int t=0, c=0; //C es un contador que indica cuantos equipos se usaron
                             ArrayList<Equipo> es = pedirHoras();
                             for(Equipo e : es){
-                                int timeE = timeASeg(e.gethEquipo())+(e.getLatencia()/2); //Tiempo del equipo
+                                int timeE = timeASeg(e.gethEquipo()); //Tiempo del equipo
+                                //int timeE = timeASeg(e.gethEquipo())+(e.getLatencia()/2); //Tiempo del equipo
                                 //Discriminar por hora de referencia
                                 if(timeE<time+TIMEREF && timeE>time-TIMEREF){
                                     t+=timeE;
@@ -186,7 +187,8 @@ public class AlgoritmoBerkeley {
                             //Calcular y enviar el ajuste de cada equipo
                             for(Equipo e : es){
                                 int timeE = timeASeg(e.gethEquipo());
-                                int ajuste = (prom+(e.getLatencia()/2))-timeE;
+                                int ajuste = prom-timeE;
+                                //int ajuste = (prom+(e.getLatencia()/2))-timeE;
                                 e.setAdelantar(0);
                                 e.setRelentizar(0);
                                 if(ajuste<0){

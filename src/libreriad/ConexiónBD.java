@@ -347,7 +347,7 @@ public class ConexiónBD {
             System.out.println(ex);
         }
 
-        return e.getId();
+        return idEquipo(e.getNombre());
     }
     
     //Metodo que regresa el ID con base al metodo de arribita, ggg salu2.
