@@ -28,7 +28,7 @@ CREATE TABLE `equipos` (
   `Nombre` varchar(30) DEFAULT NULL,
   `Latencia` int(11) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +52,7 @@ CREATE TABLE `horacentral` (
   `hPrev` varchar(15) DEFAULT NULL,
   `hRef` varchar(15) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,7 +83,7 @@ CREATE TABLE `horaequipos` (
   KEY `IDEquipo` (`IDEquipo`),
   CONSTRAINT `horaequipos_ibfk_1` FOREIGN KEY (`IDhSincr`) REFERENCES `horacentral` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `horaequipos_ibfk_2` FOREIGN KEY (`IDEquipo`) REFERENCES `equipos` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,4 +104,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-05-15 23:48:16
+-- Dump completed on 2019-05-16 21:39:27
