@@ -74,6 +74,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     AlgoritmoAnillo aa = new AlgoritmoAnillo();
     //Replicación primaria
     Replicacion re = new Replicacion();
+    //Peticiones 
+    Libro lro = new Libro();
     
     
     /*----------------------------------Código vista libros--------------------------*/
@@ -164,7 +166,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         aa.vivo();
         
         //Servidor de las peticiones de libro
-        re.serverReplica();
+        lro.servidorPeticiones();
         
         //Cargar los siguientes de una archivo
         //Si esta vacío es la primera vez que aparece el nodo
@@ -411,7 +413,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                                 .addGap(4, 4, 4))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(28, 28, 28)
-                        .addComponent(lbLibros, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lbLibros, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnReIni)
                         .addGap(132, 132, 132)
