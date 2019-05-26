@@ -286,14 +286,23 @@ public class AlgoritmoAnillo {
                                 guardarLista(namae);
                                 //Enviar a todos los nodos siguientes
                                 for(int e=0;e<namae.size();e++){
-                                    Socket nodo = new Socket(InetAddress.getByName(MAQ+namae.get(e)), 2066);
-                                    ObjectOutputStream ods = new ObjectOutputStream(nodo.getOutputStream());
-                                    System.out.println("Habemus cordinadus a "+ MAQ+namae.get(e));
-                                    System.out.println(la.subList(0, la.size())+"\n");
-                                    ods.writeObject(la);
-                                    ods.flush();
-                                    nodo.close();
+                                    try{
+                                        InetAddress aux = InetAddress.getByName(MAQ+namae.get(e));
+                                        System.out.println("YASASHI "+aux);
+                                        Socket nodo = new Socket(aux, 2066);
+                                        ObjectOutputStream ods = new ObjectOutputStream(nodo.getOutputStream());
+                                        System.out.println("Habemus cordinadus a "+ MAQ+namae.get(e));
+                                        System.out.println(la.subList(0, la.size())+"\n");
+                                        ods.writeObject(la);
+                                        ods.flush();
+                                        nodo.close();
+                                    }catch(Exception ex){
+                                        System.out.println("No se pudo enviar nuevo coordinador a : "+namae.get(e));
+                                        //ex.printStackTrace();
+                                    }
                                 }
+                                //Terminar el procesado del coordinador
+                                procesando = false;
                                 //Enviar a todos los FE
                                 multiCoordinador(name);
                             }

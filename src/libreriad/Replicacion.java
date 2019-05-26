@@ -109,6 +109,7 @@ public class Replicacion {
                     
                     con2.crearBD();
                     con.cargarBD();
+                    break;
                 }
             }
         } catch (IOException ex) {

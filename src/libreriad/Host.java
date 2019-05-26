@@ -7,7 +7,7 @@ public class Host {
     public static void main(String[] args) {
         try{
             while(true){
-                System.out.println("La ip es: "+InetAddress.getByName("E3"));
+                System.out.println("La ip es: "+InetAddress.getByName("E2"));
                 Thread.sleep(400);
             }
         }
