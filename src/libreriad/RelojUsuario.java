@@ -3,19 +3,14 @@ package libreriad;
 
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static libreriad.MuestraImage.cadenaDig;
+import static libreriad.Reloj.cadenaDig;
 
 
 public class RelojUsuario extends javax.swing.JFrame {
@@ -48,6 +43,41 @@ public class RelojUsuario extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(RelojUsuario.class.getName()).log(Level.SEVERE, null, ex);
         }
+        try {
+            cl = new MulticastSocket(4000);
+        
+            System.out.println("Cliente escuchando puerto "+cl.getLocalPort());
+            cl.setReuseAddress(true);
+            try{
+                gpo=InetAddress.getByName("228.1.1.1"); //Puede entrar dentro de un rango no válido
+            }catch(UnknownHostException u){
+                System.err.println("Dirección no válida");
+            }
+            cl.joinGroup(gpo);
+            System.out.println("Unido al grupo");
+         } catch (IOException ex) {
+            Logger.getLogger(RelojUsuario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //Cachar las actualizaciones del server
+            canal = new Thread(new Runnable(){
+                @Override
+                public void run(){
+                    DatagramPacket rec = new DatagramPacket(new byte[20], 20);
+                    while(true){
+                        try {
+                            cl.receive(rec);
+                            System.out.println("Llega "+new String(rec.getData()));
+                            String aux = new String(rec.getData());
+                            //Recibir mensajes solo de su numero de reloj
+                            if(aux.charAt(0)!='c' && aux.charAt(8)==nr.charAt(0)){
+                                lbr.setText(aux.substring(0,8));
+                            }
+                        } catch (IOException ex) {
+                            Logger.getLogger(RelojUsuario.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            });
     }
     
     
@@ -153,16 +183,7 @@ public class RelojUsuario extends javax.swing.JFrame {
 
     private void btniniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btniniActionPerformed
         try{
-            cl = new MulticastSocket(4000);
-            System.out.println("Cliente escuchando puerto "+cl.getLocalPort());
-            cl.setReuseAddress(true);
-            try{
-                gpo=InetAddress.getByName("228.1.1.1"); //Puede entrar dentro de un rango no válido
-            }catch(UnknownHostException u){
-                System.err.println("Dirección no válida");
-            }
-            cl.joinGroup(gpo);
-            System.out.println("Unido al grupo");
+            
         
             //Numero de cliente
             //String cli="c";
@@ -177,27 +198,6 @@ public class RelojUsuario extends javax.swing.JFrame {
             lb.setVisible(false);
             lbh.setText("Reloj "+nr);
             
-            //Cachar las actualizaciones del server
-            canal = new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    DatagramPacket rec = new DatagramPacket(new byte[20], 20);
-                    while(true){
-                        try {
-                            cl.receive(rec);
-                            System.out.println("Llega "+new String(rec.getData()));
-                            String aux = new String(rec.getData());
-                            //Recibir mensajes solo de su numero de reloj
-                            if(aux.charAt(0)!='c' && aux.charAt(8)==nr.charAt(0)){
-                                lbr.setText(aux.substring(0,8));
-                                //System.out.println("Metí");
-                            }
-                        } catch (IOException ex) {
-                            Logger.getLogger(RelojUsuario.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-                }
-            });
             
             
             //Iniciar el reloj
@@ -207,32 +207,35 @@ public class RelojUsuario extends javax.swing.JFrame {
                     try {
                         int seg, min, hor;
                         while(true){
-                                tiempo = lbr.getText();
+                            Thread.sleep(segundero);
+                            tiempo = lbr.getText();
+                            String aux = tiempo;
 
-                                seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
-                                min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
-                                hor = Integer.parseInt(tiempo.substring(0,2));
-                                if(seg <59) seg++;
+                            seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
+                            min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
+                            hor = Integer.parseInt(tiempo.substring(0,2));
+                            if(seg <59) seg++;
+                            else{
+                                seg=0;
+                                if(min<59) min++;
                                 else{
-                                    seg=0;
-                                    if(min<59) min++;
-                                    else{
-                                        min=0;
-                                        if(hor<23) hor++;
-                                        else hor=0;
-                                    }
+                                    min=0;
+                                    if(hor<23) hor++;
+                                    else hor=0;
                                 }
-
+                            }
+                            if(lbr.getText().equals(aux)){
                                 lbr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
-                                Thread.sleep(segundero);
+                            }
                         }
                         } catch (Exception ex) {
                             System.out.println("Error en hilo: "+ex);
                         }
                 }
             });
-            canal.start();
             hilo.start();
+            canal.start();
+            
             
             btnPedir.setVisible(true);
         }catch(Exception e){

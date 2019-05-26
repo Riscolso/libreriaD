@@ -8,28 +8,31 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static libreriad.RelojUsuario.setTime;
+import static libreriad.AlgoritmoAnillo.stillAlive;
+import static libreriad.AlgoritmoAnillo.MAQ;
 
+/**
+ * Clase corriendo del lado del cliente.
+ * @author Equipo 7 RULES.
+ */
 public class FrontEnd {
-    public static int elsujeto = -1;
-    //Trata de conectar a un coordinador y regresa su número
+    public int elsujeto = -1;
+    /**
+     * Trata de conectar a un coordinador y regresa su número
+     * @return Número del nodo coordinador.
+     * @throws UnknownHostException 
+     */
     public int buscarElSujeto() throws UnknownHostException{
         //Va a tratar de conectar a un coordinador, tolerancia de hasta 2 muertos
         for(int i=1;i<4;i++){
-            if(MuestraImage.stillAlive(InetAddress.getByName(MuestraImage.maq+i))){
+            if(stillAlive(InetAddress.getByName(MAQ+i))){
                 elsujeto = i;
                 return i;
             }
@@ -37,23 +40,23 @@ public class FrontEnd {
         return -1;
     }
     
-    //Le dice a los coordinadores secuandarios cuando el primario esta muerto
-    // si hay servidores vivos
-    //False si no hay ninguno
+    /**
+     * Le dice a los coordinadores secuandarios cuando el primario muere, si hay servidores vivos.
+     * @return true si se elegió un nuevo nodo en el sistema, false en caso de que no haya nodos vivos.
+     * @throws UnknownHostException
+     * @throws IOException 
+     */
     public boolean chismoso() throws UnknownHostException, IOException{
         //Tolerancia de 3 nodos 
         for(int i=elsujeto;i<4;i++){
-            InetAddress dir = InetAddress.getByName(MuestraImage.maq+i);
-            if(MuestraImage.stillAlive(dir)){
+            InetAddress dir = InetAddress.getByName(MAQ+i);
+            if(stillAlive(dir)){
                 Socket cl = new Socket(dir, 2068);
-                PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-                pw.println("Ey, psss, se cayó el principal"); //En realidad ni siquiera lee el mensaje :v
-                pw.flush();
                 //Va a esperar hasta que la elección acabe 
                 BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                 String mensaje = br2.readLine();
                 if(mensaje.equals("Listo")) {
-                    elsujeto = i;
+                    //elsujeto = i; v1
                     return true;
                 }
             }
@@ -61,11 +64,35 @@ public class FrontEnd {
         return false;
     }
     
-    /*Checa si el coordinador esta vivo, si sí, pide un libro
-    Si no, inicia la votación en los nodos secundarios y manda */
+    /**
+     * Checa si el coordinador esta vivo, si sí, pide un libro
+     * , si no, inicia la votación en los nodos secundarios.
+     * @return Nombre del libro
+     * @throws UnknownHostException Si no se pudo conectar con algún nodo
+     * @throws IOException Si no se pudo conectar con algún nodo
+     */
+    public String peticion() throws UnknownHostException, IOException{
+        for(int i=1;i<4;i++){
+            if(stillAlive(InetAddress.getByName(MAQ+i))){
+                //Si el coordinador al que apunta esta muerto se escoge uno nuevo
+                if(i != elsujeto){
+                    if(chismoso()){
+                        elsujeto = i;
+                        return pedirLibro();
+                    } // Hasta que se escoja un nuevo coordinador se bloquea
+                    System.out.println("Ya valió, no hay servidores vivos");
+                    return new String("Todo terminó señores, no tenemos escapatoria");
+                }
+                return pedirLibro();
+            }
+        }
+        return new String("Todo terminó señores, no tenemos escapatoria");
+    }
+    
+    /*
     public String peticion() throws UnknownHostException, IOException{
         //Si el coordinador al que apunta esta muerto se escoge uno nuevo
-        if(!MuestraImage.stillAlive(InetAddress.getByName(MuestraImage.maq+elsujeto))){
+        if(!stillAlive(InetAddress.getByName(MAQ+elsujeto))){
             //Si se escogió un nuevo coordinador
             if(chismoso()) return pedirLibro();
             //Si ya no hay ninguno
@@ -75,8 +102,14 @@ public class FrontEnd {
         System.out.println("Entro con "+elsujeto);
         return pedirLibro();
     }
+    */
     
-    //Escucha constantemenete cual es el nuevo coordinador
+    /**
+     * Escucha constantemenete cual es el nuevo coordinador. <br> 
+     * Funciona cuando quiere >:v
+     * @throws IOException Error al inicial multicast.
+     * @deprecated 
+     */
     public void servidorCoordinador() throws IOException{
         MulticastSocket cl = new MulticastSocket(2000);
         InetAddress gpo;
@@ -108,12 +141,18 @@ public class FrontEnd {
         canal.start();
     }
     
+    /**
+     * Hace una petición del libro al nodo coordinador.
+     * @return nombre del libro.
+     * @throws UnknownHostException En caso de que el nodo al que se quiere conectar no es alcanzable.
+     * @throws IOException En caso de que la dirección se encuentre mal.
+     */
     public String pedirLibro() throws UnknownHostException, IOException{
-        Socket cl= new Socket(InetAddress.getByName(MuestraImage.maq+elsujeto),1234);
+        Socket cl= new Socket(InetAddress.getByName(MAQ+elsujeto),1234);
         //Hacemos una petición
-        PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+        /*PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
         pw.println("Dame libro >:v");
-        pw.flush();     
+        pw.flush(); v1 */     
 
         //Creamos un flujo de caracter ligado al socket para recibir el mensaje
         BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));

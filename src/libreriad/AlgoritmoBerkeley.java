@@ -11,15 +11,16 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static libreriad.MuestraImage.cadenaDig;
+import static libreriad.Reloj.cadenaDig;
+import static libreriad.Reloj.setTime;
 
 /**
 * <h1>Clase encargada de todo lo relacionado con el Argotirmo de Berkeley</h1> <br>
 * Los métodos staticos presentarseServTime() y hiloEscuchaHora() son para usarse en el 
 * código de los nodos del sistema distribuido. <br>
 * Todo lo demás esta pensado para usarse en el Servidor de Tiempo
-* @author  Equipo 3 RULEZ
-* @version 1.0
+* @author  Equipo 7 RULEZ
+* @version 2.0
 * @since   2019-04-05
 */
 
@@ -390,14 +391,14 @@ public class AlgoritmoBerkeley {
                                     ajuste*=-1;
                                     System.out.println("ZA WARUDO TOKI WO TOMARE!");
                                     //Relentelizar al 25%
-                                    MuestraImage.setTime(msj, 0, 1000*2, true);
+                                    setTime(msj, 0, 1000*2, true);
                                     try {
                                         Thread.sleep(ajuste*2*1000);
                                     } catch (InterruptedException ex) {
                                         Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                     //Regresar al segundero normal
-                                    MuestraImage.setTime(msj, 0, 1000, true);
+                                    setTime(msj, 0, 1000, true);
                                     System.out.println("Toki wa ugoki dasu");
                                 }
                                 //Adelantar el reloj
@@ -425,7 +426,7 @@ public class AlgoritmoBerkeley {
                                     }
                                     String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
                                     System.out.println("El nuevo tiempo es "+time);
-                                    MuestraImage.setTime(time, 0, 1000, true);
+                                    setTime(time, 0, 1000, true);
                                 }
                                 br.close();
                                 cl.close();

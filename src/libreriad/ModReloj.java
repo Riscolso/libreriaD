@@ -2,6 +2,8 @@ package libreriad;
 
 import java.awt.Image;
 import java.awt.Toolkit;
+import static libreriad.Reloj.setTime;
+
 
 
 public class ModReloj extends javax.swing.JFrame {
@@ -10,7 +12,7 @@ public class ModReloj extends javax.swing.JFrame {
     
     //t = El tiempo que había en el el reloj
     //n = El número de reloj
-    public void setTime(String t, int noReloj, int segundero){
+    public void setTimeM(String t, int noReloj, int segundero){
         seg.setValue(Integer.parseInt(t.substring(t.lastIndexOf(":")+1)));
         min.setValue(Integer.parseInt(t.substring(t.indexOf(":")+1,t.lastIndexOf(":"))));
         hor.setValue(Integer.parseInt(t.substring(0,2)));
@@ -145,7 +147,7 @@ public class ModReloj extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         //Establecer la nueva hora
-        MuestraImage.setTime(cadenaDig(hor.getValue().toString())+":"
+        setTime(cadenaDig(hor.getValue().toString())+":"
                 +cadenaDig(min.getValue().toString())+":"
                 +cadenaDig(seg.getValue().toString()), noReloj, Integer.parseInt(segundero.getValue()+""), false);
         //Ocultar la ventana
@@ -154,7 +156,7 @@ public class ModReloj extends javax.swing.JFrame {
 
     private void btnemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnemActionPerformed
         //Establecer la nueva hora
-        MuestraImage.setTime(cadenaDig(hor.getValue().toString())+":"
+        setTime(cadenaDig(hor.getValue().toString())+":"
                 +cadenaDig(min.getValue().toString())+":"
                 +cadenaDig(seg.getValue().toString()), noReloj, Integer.parseInt(segundero.getValue()+""), true);
         //Ocultar la ventana
