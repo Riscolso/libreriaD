@@ -23,7 +23,7 @@ import static libreriad.AlgoritmoAnillo.MAQ;
  * @author Equipo 7 RULES.
  */
 public class FrontEnd {
-    public static int elsujeto = -1;
+    public int elsujeto = -1;
     /**
      * Trata de conectar a un coordinador y regresa su número
      * @return Número del nodo coordinador.
@@ -56,7 +56,7 @@ public class FrontEnd {
                 BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));
                 String mensaje = br2.readLine();
                 if(mensaje.equals("Listo")) {
-                    elsujeto = i;
+                    //elsujeto = i; v1
                     return true;
                 }
             }
@@ -76,8 +76,11 @@ public class FrontEnd {
             if(stillAlive(InetAddress.getByName(MAQ+i))){
                 //Si el coordinador al que apunta esta muerto se escoge uno nuevo
                 if(i != elsujeto){
-                    if(chismoso()) return pedirLibro(); // Hasta que se escoja un nuevo coordinador se bloquea
-                    else System.out.println("Ya valió, no hay servidores vivos");
+                    if(chismoso()){
+                        elsujeto = i;
+                        return pedirLibro();
+                    } // Hasta que se escoja un nuevo coordinador se bloquea
+                    System.out.println("Ya valió, no hay servidores vivos");
                     return new String("Todo terminó señores, no tenemos escapatoria");
                 }
                 return pedirLibro();
@@ -147,9 +150,9 @@ public class FrontEnd {
     public String pedirLibro() throws UnknownHostException, IOException{
         Socket cl= new Socket(InetAddress.getByName(MAQ+elsujeto),1234);
         //Hacemos una petición
-        PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
+        /*PrintWriter pw =new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
         pw.println("Dame libro >:v");
-        pw.flush();     
+        pw.flush(); v1 */     
 
         //Creamos un flujo de caracter ligado al socket para recibir el mensaje
         BufferedReader br2 = new BufferedReader(new InputStreamReader(cl.getInputStream()));

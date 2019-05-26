@@ -170,7 +170,7 @@ public class AlgoritmoAnillo {
                         System.out.println("Procesando nuevo coordinador...");
                         //Esperara a que se termine de escoger un nuevo coordinador
                         //El sleep es para que no se gasten taaaaaantos recursos
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     }
                     System.out.println("Nuevo coordinador");
                     b = true;
@@ -288,7 +288,6 @@ public class AlgoritmoAnillo {
                                 for(int e=0;e<namae.size();e++){
                                     try{
                                         InetAddress aux = InetAddress.getByName(MAQ+namae.get(e));
-                                        System.out.println("YASASHI "+aux);
                                         Socket nodo = new Socket(aux, 2066);
                                         ObjectOutputStream ods = new ObjectOutputStream(nodo.getOutputStream());
                                         System.out.println("Habemus cordinadus a "+ MAQ+namae.get(e));
