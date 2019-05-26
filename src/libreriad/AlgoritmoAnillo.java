@@ -74,6 +74,7 @@ public class AlgoritmoAnillo {
                         System.out.print("");
                     }catch(Exception ex){
                         System.out.println("Error en el hilo de latido "+ex);
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -117,6 +118,7 @@ public class AlgoritmoAnillo {
                     s = new ServerSocket(2067);
                 } catch (IOException ex) {
                     System.out.println("Error al iniciar el server socket "+ex);
+                    ex.printStackTrace();
                 }
                 while(true){
                     try {
@@ -216,6 +218,7 @@ public class AlgoritmoAnillo {
             }
         }catch(Exception ex){
             System.out.println("No se pudo enviar la trama de elección "+ex);
+            ex.printStackTrace();
         }
     }
     
@@ -336,6 +339,7 @@ public class AlgoritmoAnillo {
                     }
                 }catch(Exception ex){
                     System.out.println("Error en servidor de elección "+ex);
+                    ex.printStackTrace();
                 }
             }
         });
@@ -410,6 +414,7 @@ public class AlgoritmoAnillo {
                     }
                 } catch (IOException ex) {
                     System.out.println("Error en el servidor de chismes "+ ex);
+                    ex.printStackTrace();
                 }
             }
         });
