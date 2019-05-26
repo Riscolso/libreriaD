@@ -186,6 +186,7 @@ public class AlgoritmoAnillo {
             return true;
         }catch(Exception ex){
             System.out.println("Error en el inicio de elección "+ex);
+            ex.printStackTrace();
             return false;
         }
     }

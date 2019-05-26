@@ -534,9 +534,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         mr.setTimeM(r.tiempo[3], 3, r.segundero[3]);
         mr.setVisible(true);
     }//GEN-LAST:event_r4ActionPerformed
-    
-    
-    
+
     private void btnReIniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReIniActionPerformed
         
         //Modificar la disponibilidad de manera local
