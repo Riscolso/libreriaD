@@ -5,7 +5,7 @@ PE: Computadora 1: "E1", computadora 2: "E2", ... computadora n: "En".
 
 Para echarlo a andar.
 En caso de ser la primera vez que se va a ejecutar.
-  1.-Verificar que en la carpeta del proyecto no se encuentre el archivo "siguientes.obj" en ninguno de los equipos a levantar, en        caso contrario eliminarlo.
+  1.-Verificar que en la carpeta del proyecto no se encuentre el archivo "siguientes.obj" en ninguno de los equipos a levantar, en        caso contrario eliminarlo.<br>
   2.-En el archivo "AlgoritmoBerkeley.java" modificar "IPSERV" por la ip del servidor de tiempo.
   3.-Cargar "reloj.sql" en el SGBD.
   4.-Cargar "liberia.sql" en el SGBD.
