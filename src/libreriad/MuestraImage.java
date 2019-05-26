@@ -17,6 +17,18 @@
 
 //Replicación
 //Qué pasa si lo que responde el secundario no es Chido (Y)
+
+
+
+
+/*
+-Variables estaticas a la clase libreriaD
+-Actualizar segunderos en los clientes
+-Crear relojes independientes
+*/
+
+
+
 package libreriad;
 
 import java.awt.Image;
@@ -31,11 +43,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 
 public class MuestraImage extends javax.swing.JFrame implements Serializable {
@@ -56,8 +66,14 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     public static ConexiónBD con2 = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306");
     
     public static boolean procesando = false;
-    
+    //Algoritmo de Berkeley
     AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
+    //Relojes
+    Reloj r = new Reloj();
+    //Algoritmo de anillo
+    AlgoritmoAnillo aa = new AlgoritmoAnillo();
+    //Replicación primaria
+    Replicacion re = new Replicacion();
     
     
     /*----------------------------------Código vista libros--------------------------*/
@@ -129,50 +145,46 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         //Vista para mostrar info del libro 
         vistaInfoLibro();
         //Código para los relojes
-        iniciarRelojes();
+        r.iniciarRelojes();
         
         
         try {
             //Saber cuál es el nombre de la máquina
             //Suponiendo que todos tienen un número de nombre xD
             String aux = InetAddress.getLocalHost().getHostName()+"";
-            name = Integer.parseInt(aux.charAt(1)+"");
-            System.out.println("Mi nombre "+name);
+            aa.name = Integer.parseInt(aux.charAt(1)+"");
+            System.out.println("Mi nombre "+aa.name);
         } catch (UnknownHostException ex) {
             System.out.println("Error al obtener mi nombre... Who am i?: "+ ex);
         }
         //Hilo que se encarga de todo el algoritmo del anillo
-        Thread hiloEleccion = new Thread(eleccion());
-        hiloEleccion.start();
+        aa.eleccion();
         
         //Hilo para que informe si esta vivo el nodo
-        Thread alive = new Thread(vivo());
-        alive.start();
+        aa.vivo();
         
         //Servidor de las peticiones de libro
-        Thread serverLibros = new Thread(servidorPeticiones());
-        serverLibros.start();
+        re.serverReplica();
         
         //Cargar los siguientes de una archivo
         //Si esta vacío es la primera vez que aparece el nodo
-        namae = cargarLista();
+        aa.namae = aa.cargarLista();
         
         //Iniciar servidor de relojes
-        Thread serverMulticastRelojes = new Thread(servidorRelojes());
-        serverMulticastRelojes.start();
+        r.servidorRelojes();
         
         //Iniciar el canal de comunicación que envía cuando hay nuevo coordinador a los FE
-        iniciarMulti();
+        aa.iniciarMulti();
         
         //Hilo para enviar BD
-        enviarBD();
+        re.enviarBD();
         
         //Si no hay siguientes
-        if(namae.size() == 0){
+        if(aa.namae.size() == 0){
             //Si es el primerísimo de todos 
-            if(name == 1){
+            if(aa.name == 1){
                 System.out.println("Estoy solo en el mundo\nHello darkness my old friend");
-                elsujeto = name;
+                aa.elsujeto = aa.name;
 
                 //Código para las peticiones
                 btnReIni.setVisible(true);
@@ -181,47 +193,40 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                 con.respaldarBD();
                 
                 //Escuchar cada que hay una replica
-                Thread replica = new Thread(serverReplica());
-                replica.start();
+                re.serverReplica();
 
-                namae.add(2);
+                aa.namae.add(2);
             }
             //Si es un nodo nuevo y es secundario
             else{
                 //El nodo 1 siempre debe estar encendido cuando se inicia un nodo nuevo
-                namae.add(1);
-                
-                timeToDuel();
-                Thread beats = new Thread(beat());
-                beats.start();
+                aa.namae.add(1);
+                aa.timeToDuel();
+                aa.beat();
                 //Escuchar cada que hay una replica
-                Thread replica = new Thread(serverReplica());
-                replica.start();
+                re.serverReplica();
                 //Escuchar a los FE cuando se caíga el principal
-                serverChismes();
+                aa.serverChismes();
                 
-                pedirBD();
+                re.pedirBD();
             }
         }
         //Si esta reviviendo de sus cenizas cual ave fénix
-        else if(name!=1){
-            timeToDuel();
-            Thread beats = new Thread(beat());
-            beats.start();
+        else if(aa.name!=1){
+            aa.timeToDuel();
+            aa.beat();
             //Escuchar cada que hay una replica, el primario nunca lo va a iniciar
-            Thread replica = new Thread(serverReplica());
-            replica.start();
+            re.serverReplica();
             //Escuchar a los FE cuando se caíga el principal
-            serverChismes();
-            pedirBD();
+            aa.serverChismes();
+            re.pedirBD();
         }
         //Y ya si es el coordinador principal el que revive
         else{
             //Escuchar cada que hay una replica
-            Thread replica = new Thread(serverReplica());
-            replica.start();
-            timeToDuel();
-            pedirBD();
+            re.serverReplica();
+            aa.timeToDuel();
+            re.pedirBD();
         }
         noLibros=con.obtenerLibros();
         lbLibros.setText("Libros disponibles: "+ noLibros);
@@ -504,27 +509,27 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     private void r1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r1ActionPerformed
         //Pausar el hilo
         //El método suspend esta depreciado xD
-        on[0] = false;
+        r.on[0] = false;
         //Mandar tiempo y no de reloj al otr frame
-        mr.setTime(tiempo[0], 0, segundero[0]);
+        mr.setTimeM(r.tiempo[0], 0, r.segundero[0]);
         mr.setVisible(true);
     }//GEN-LAST:event_r1ActionPerformed
 
     private void r2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r2ActionPerformed
-        on[1] = false;
-        mr.setTime(tiempo[1], 1, segundero[1]);
+        r.on[1] = false;
+        mr.setTimeM(r.tiempo[1], 1, r.segundero[1]);
         mr.setVisible(true);
     }//GEN-LAST:event_r2ActionPerformed
 
     private void r3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r3ActionPerformed
-        on[2] = false;
-        mr.setTime(tiempo[2], 2, segundero[2]);
+        r.on[2] = false;
+        mr.setTimeM(r.tiempo[2], 2, r.segundero[2]);
         mr.setVisible(true);
     }//GEN-LAST:event_r3ActionPerformed
 
     private void r4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r4ActionPerformed
-        on[3] = false;
-        mr.setTime(tiempo[3], 3, segundero[3]);
+        r.on[3] = false;
+        mr.setTimeM(r.tiempo[3], 3, r.segundero[3]);
         mr.setVisible(true);
     }//GEN-LAST:event_r4ActionPerformed
     
@@ -536,7 +541,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         con.modifDispo();
         noLibros=con.obtenerLibros();
         lbLibros.setText("Libros disponibles: "+ noLibros);
-        replicacion(new Peticion("-1"));
+        re.replicacion(new Peticion("-1"));
         /*try {
             //Modificar la disponibilidad de manera remota
             //if(!stub.reiniciarSesion()) System.out.println("Explotó algo EN el servidor remoto");
@@ -546,9 +551,9 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     }//GEN-LAST:event_btnReIniActionPerformed
 
     private void btncorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btncorActionPerformed
-        System.out.println("El coordinador es: "+elsujeto);
+        System.out.println("El coordinador es: "+aa.elsujeto);
         System.out.println("Mi tabla de siguientes es ");
-        for(int a : namae){
+        for(int a : aa.namae){
             System.out.print(a+" ");
         }
         System.out.println("");
