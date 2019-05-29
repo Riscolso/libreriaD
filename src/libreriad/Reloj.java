@@ -8,7 +8,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import static libreriad.MuestraImage.*;
+import static libreriad.RelojUsuario.segundero;
 
 /**
  * Genera relojes y el control de estos ya sea local o remoto
@@ -32,6 +34,47 @@ public class Reloj {
      * Arreglo con el switch de encendido/apagado de los relojes.
      */
     public static boolean on[];
+    
+    /**
+     * Liga un reloj a un label
+     * @param lbr label en donde se mostrará el reloj
+     * @param segundero tiempo de espera entre aumento de segundos (en milisegundos)
+     */
+    public void reloj(JLabel lbr, int segundero){
+        Thread hilo = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int seg, min, hor;
+                    while(true){
+                        Thread.sleep(segundero);
+                        String tiempo = lbr.getText();
+                        String aux = tiempo;
+
+                        seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
+                        min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
+                        hor = Integer.parseInt(tiempo.substring(0,2));
+                        if(seg <59) seg++;
+                        else{
+                            seg=0;
+                            if(min<59) min++;
+                            else{
+                                min=0;
+                                if(hor<23) hor++;
+                                else hor=0;
+                            }
+                        }
+                        if(lbr.getText().equals(aux)){
+                            lbr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Error en hilo: "+ex);
+                }
+            }
+        });
+        hilo.start();
+    }
     
     //Todo lo relacionado con crear los relojes, su hora, los hilos que lo manejan ETC
     public void iniciarRelojes(){

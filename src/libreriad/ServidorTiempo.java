@@ -23,9 +23,6 @@ public class ServidorTiempo {
         //Asignar tiempo a el servidor
         Date date = new Date();
         DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
-        ab.tiempo = hourFormat.format(date);
-        System.out.println("El tiempo es: "+ab.tiempo);
         ab.hiloEscuchaEquipos();
-        ab.berkeley();
     }
 }

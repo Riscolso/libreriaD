@@ -41,12 +41,10 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.table.DefaultTableModel;
 
 public class MuestraImage extends javax.swing.JFrame implements Serializable {
     
@@ -62,8 +60,8 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     static DatagramPacket p = null;
     
     //Para base de datos
-    public static ConexiónBD con = new ConexiónBD("root", "Alohomora21v", "jdbc:mysql://localhost:3306/libreriad");
-    public static ConexiónBD con2 = new ConexiónBD("root", "Alohomora21v", "jdbc:mysql://localhost:3306");
+    public static ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/libreriad");
+    public static ConexiónBD con2 = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306");
     
     public static boolean procesando = false;
     //Algoritmo de Berkeley
