@@ -28,6 +28,7 @@ public class RelojUsuario extends javax.swing.JFrame {
     /*--------------------------Constructor--------------------*/
     public RelojUsuario() {
         initComponents();
+        setLocationRelativeTo(this);
         btnPedir.setVisible(false);
         fe = new FrontEnd();
         //Obtener el número del coordiandor
@@ -95,111 +96,161 @@ public class RelojUsuario extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         lbh = new javax.swing.JLabel();
         lbr = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
         btnini = new javax.swing.JButton();
-        spn = new javax.swing.JSpinner();
-        lb = new javax.swing.JLabel();
-        btnPedir = new javax.swing.JButton();
         lbLibro = new javax.swing.JLabel();
+        btnPedir = new javax.swing.JButton();
+        lb = new javax.swing.JLabel();
+        spn = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setIconImage(getIconImage());
 
+        jPanel1.setBackground(new java.awt.Color(102, 102, 255));
+
         lbh.setFont(new java.awt.Font("Dialog", 1, 36)); // NOI18N
+        lbh.setForeground(new java.awt.Color(0, 0, 0));
         lbh.setText("Reloj");
 
         lbr.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        lbr.setForeground(new java.awt.Color(0, 0, 0));
         lbr.setText("00:00:00");
 
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(42, 42, 42)
+                .addComponent(lbh)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lbr)
+                .addGap(21, 21, 21))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(lbh))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(20, Short.MAX_VALUE)
+                .addComponent(lbr)
+                .addContainerGap())
+        );
+
+        lbr.setVisible(false);
+
+        jPanel2.setBackground(new java.awt.Color(51, 0, 102));
+
+        btnini.setBackground(new java.awt.Color(255, 255, 255));
+        btnini.setForeground(new java.awt.Color(0, 0, 0));
         btnini.setText("Iniciar");
+        btnini.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnini.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btniniActionPerformed(evt);
             }
         });
 
-        spn.setModel(new javax.swing.SpinnerNumberModel(0, 0, 3, 1));
+        lbLibro.setForeground(new java.awt.Color(0, 0, 0));
 
-        lb.setText("Número de reloj");
-
+        btnPedir.setBackground(new java.awt.Color(255, 255, 255));
+        btnPedir.setForeground(new java.awt.Color(0, 0, 0));
         btnPedir.setText("Pedir Libro");
+        btnPedir.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnPedir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPedirActionPerformed(evt);
             }
         });
 
+        lb.setForeground(new java.awt.Color(255, 255, 255));
+        lb.setText("Número de reloj");
+
+        spn.setModel(new javax.swing.SpinnerNumberModel(0, 0, 3, 1));
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lbLibro, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(btnPedir)
+                .addGap(103, 103, 103))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGap(29, 29, 29)
+                .addComponent(lb)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(spn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 116, Short.MAX_VALUE)
+                .addComponent(btnini)
+                .addGap(35, 35, 35))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(35, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lb)
+                    .addComponent(spn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnini))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lbLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPedir)
+                .addGap(18, 18, 18))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(121, 121, 121)
-                .addComponent(btnPedir)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(lbLibro, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(lb)
-                                .addGap(18, 18, 18)
-                                .addComponent(spn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(lbh))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnini)
-                            .addComponent(lbr))
-                        .addGap(24, 24, 24))))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbh)
-                    .addComponent(lbr))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lb)
-                    .addComponent(spn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnini))
-                .addGap(26, 26, 26)
-                .addComponent(btnPedir)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lbLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0))
         );
-
-        lbr.setVisible(false);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnPedirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPedirActionPerformed
+        try {
+            lbLibro.setText("Libro otorgado: "+ fe.peticion());
+        } catch (IOException ex) {
+            System.out.println("Error en la petición "+ex);
+        }
+    }//GEN-LAST:event_btnPedirActionPerformed
+
     private void btniniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btniniActionPerformed
         try{
-            
-        
+
             //Numero de cliente
             //String cli="c";
             nr = spn.getValue()+"";
-            DatagramPacket envio = new DatagramPacket (("c"+nr).getBytes(), ("c"+nr).getBytes().length, gpo, 9875); 
+            DatagramPacket envio = new DatagramPacket (("c"+nr).getBytes(), ("c"+nr).getBytes().length, gpo, 9875);
             //Enviar una solicitud
             cl.send(envio);
-            
+
             lbr.setVisible(true);
             btnini.setVisible(false);
             spn.setVisible(false);
             lb.setVisible(false);
             lbh.setText("Reloj "+nr);
-            
-            
-            
+
             //Iniciar el reloj
             hilo = new Thread(new Runnable() {
                 @Override
@@ -228,29 +279,19 @@ public class RelojUsuario extends javax.swing.JFrame {
                                 lbr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
                             }
                         }
-                        } catch (Exception ex) {
-                            System.out.println("Error en hilo: "+ex);
-                        }
+                    } catch (Exception ex) {
+                        System.out.println("Error en hilo: "+ex);
+                    }
                 }
             });
             hilo.start();
             canal.start();
-            
-            
+
             btnPedir.setVisible(true);
         }catch(Exception e){
             e.printStackTrace();
         }
-        
     }//GEN-LAST:event_btniniActionPerformed
-
-    private void btnPedirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPedirActionPerformed
-        try {
-            lbLibro.setText("Libro otorgado: "+ fe.peticion());
-        } catch (IOException ex) {
-            System.out.println("Error en la petición "+ex);
-        }
-    }//GEN-LAST:event_btnPedirActionPerformed
 
     /**
      * @param args the command line arguments
@@ -298,6 +339,8 @@ public class RelojUsuario extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnPedir;
     private javax.swing.JButton btnini;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lb;
     private javax.swing.JLabel lbLibro;
     private javax.swing.JLabel lbh;
