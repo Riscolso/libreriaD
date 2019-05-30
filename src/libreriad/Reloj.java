@@ -10,11 +10,10 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import static libreriad.MuestraImage.*;
-import static libreriad.RelojUsuario.segundero;
 
 /**
  * Genera relojes y el control de estos ya sea local o remoto
- * @author Ricardo
+ * @author potatOS
  */
 public class Reloj {
     
@@ -237,5 +236,18 @@ public class Reloj {
     public static String cadenaDig(int h){
             if(h<10) return new String("0"+h);
             else return new String(h+"");
+    }
+    
+    /**
+     * Convierte una cadena de tiempo con formato "hh:mm:ss" en un arreglo de enteros
+     * @param t tiempo en formato "hh:mm:ss"
+     * @return Arreglo de tiempo en int, [hh][mm][ss]
+     */
+    public static Integer[] timeSTI(String t){
+        Integer ti[] = new Integer[3];
+        ti[2] = Integer.parseInt(t.substring(t.lastIndexOf(":")+1));
+        ti[1] = Integer.parseInt(t.substring(t.indexOf(":")+1,t.lastIndexOf(":")));
+        ti[0] = Integer.parseInt(t.substring(0,2));
+        return ti;
     }
 }

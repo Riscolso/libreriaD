@@ -8,7 +8,6 @@ package libreriad;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import static libreriad.Reloj.BRelojes;
 
 /**
 * <h1>Servidor de tiempo</h1>

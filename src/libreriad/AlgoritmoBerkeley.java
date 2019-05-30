@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import javax.swing.JLabel;
 import static libreriad.Reloj.cadenaDig;
 import static libreriad.Reloj.setTime;
+import static libreriad.Reloj.timeSTI;
 
 /**
 * <h1>Clase encargada de todo lo relacionado con el Argotirmo de Berkeley</h1> <br>
@@ -225,7 +226,7 @@ public class AlgoritmoBerkeley {
      * @param tiempo cadena en formato "hh:mm:ss"
      * @return Cantidad de segundos que hay en la hora especificada
      */
-    public int timeASeg(String tiempo){
+    public static int timeASeg(String tiempo){
         int seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
         int min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
         int hor = Integer.parseInt(tiempo.substring(0,2));
@@ -237,7 +238,7 @@ public class AlgoritmoBerkeley {
      * @param s cantidad de segundos
      * @return tiempo
      */
-    public String segATime(int s){
+    public static String segATime(int s){
         int hor = s/(3600);
         int min = s%(3600)/60;
         int seg = s%60;
@@ -406,60 +407,52 @@ public class AlgoritmoBerkeley {
                                 }
                                 //Adelantar el reloj
                                 else if (ajuste>0){
-                                    int seg = Integer.parseInt(msj.substring(msj.lastIndexOf(":")+1));
-                                    int min = Integer.parseInt(msj.substring(msj.indexOf(":")+1,msj.lastIndexOf(":")));
-                                    int hor = Integer.parseInt(msj.substring(0,2));
-                                    //RESPECTO AL SIGUIENTE CÓDIGO, ESTOY SEGURO QUE HAY UNA FORMA MÁS ELEGANTE DE PROGRAMARLO
-                                    //PERO FUNCIONA, LA NETA TENGO SUEÑO Y ES SEMANA DE EVALUACIONES :)
-                                    
-                                    //En caso de que los segundos no sobrepasen los minutos ni las horas
-                                    //if(ajuste/60<1)<-
-                                    if(seg+ajuste <60) seg += ajuste;
-                                    else{
-                                        if(min+1<60){
-                                            min++;
-                                            seg = ajuste-(60-seg);
+                                    //Cambiar la base de los segundos
+                                    //PE: 120seg = 2 min, 3600seg = 1 hora
+                                    Integer ti[] = timeSTI(segATime(ajuste));
+                                    //Variables de ajuste
+                                    int sa = ti[2];
+                                    int ma = ti[1];
+                                    int ha = ti[0];
+                                    ti = timeSTI(msj);
+                                    //Variables del tiempo original
+                                    int seg = ti[2];
+                                    int min = ti[1];
+                                    int hor = ti[0];
+                                    //RESPECTO AL SIGUIENTE CÓDIGO, ESTOY SEGURO QUE HAY UNA FORMA MAS ELEGANTE DE HACERLO 
+                                    //PERO ES SEMANA DE EVALUACIONES Y LA NETA TENGO SUEÑO. (H E L P)
+                                    if(seg+sa<60){
+                                        seg+=sa;
+                                        if(min+sa<60){
+                                            min+=ma;
+                                            hor+=ha;
                                         }
                                         else{
-                                            min = 0;
-                                            if(hor+1<24){
-                                                hor++;
-                                                seg = ajuste-(60-seg);
-                                            }
+                                            min = ma-(60-min);
+                                            if(hor+1+ha<24) hor+=ha+1;
                                             else{
-                                                hor=0;
-                                                seg = ajuste-(60-seg);
+                                                ha++;
+                                                hor=ha-(24-hor);
                                             }
                                         }
                                     }
-                                    //En caso de que el ajuste sobrepase las horas
-                                   /* else if(ajuste/3600<1){
-                                        int sa = ajuste%60; //segundos de ajuste
-                                        int ha = ajuste/60;//horas de ajuste
-                                        int ma = ajuste%3600;//minutos de ajuste
-
-                                        //En caso de que el ajuste sobrepase los minutos
-
-
-                                    }
-                                    if(seg+ajuste <60) seg += ajuste;
                                     else{
-                                        if(min+1<60){
-                                            min++;
-                                            seg = ajuste-(60-seg);
+                                        seg=sa-(60-seg);
+                                        if(min+1+ma<60){
+                                            min+=1+ma;
+                                            hor+=ha;
                                         }
                                         else{
-                                            min = 0;
-                                            if(hor+1<24){
-                                                hor++;
-                                                seg = ajuste-(60-seg);
-                                            }
+                                            ma++;
+                                            min = ma-(60-min);
+                                            if(hor+1+ha<24) hor+=1+ha;
                                             else{
-                                                hor=0;
-                                                seg = ajuste-(60-seg);
+                                                ha++;
+                                                hor=ha-(24-hor);
                                             }
                                         }
-                                    }*/
+                                    }
+                                    if(ma==0 && sa==0) hor=ha-(24-hor);
                                     String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
                                     System.out.println("El nuevo tiempo es "+time);
                                     setTime(time, 0, 1000, true);
