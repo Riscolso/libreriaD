@@ -295,7 +295,7 @@ public class AlgoritmoBerkeley {
                                 System.out.println("Se encontró un nuevo nodo, guadado en la base de datos");
                                 e.imprimirEquipo();
                                 //Calcular el nuevo tiempo de retraso para sincronización
-                                //calcularY();
+                                calcularY();
                                 //Cerrar flujos
                                 cl.close();
                             }
