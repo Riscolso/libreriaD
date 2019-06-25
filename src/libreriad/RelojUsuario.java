@@ -28,6 +28,7 @@ public class RelojUsuario extends javax.swing.JFrame {
     /*--------------------------Constructor--------------------*/
     public RelojUsuario() {
         initComponents();
+        this.setTitle("Usuario");
         setLocationRelativeTo(this);
         btnPedir.setVisible(false);
         fe = new FrontEnd();
@@ -155,7 +156,7 @@ public class RelojUsuario extends javax.swing.JFrame {
             }
         });
 
-        lbLibro.setForeground(new java.awt.Color(0, 0, 0));
+        lbLibro.setForeground(new java.awt.Color(255, 255, 255));
 
         btnPedir.setBackground(new java.awt.Color(255, 255, 255));
         btnPedir.setForeground(new java.awt.Color(0, 0, 0));
@@ -342,7 +343,7 @@ public class RelojUsuario extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lb;
-    private javax.swing.JLabel lbLibro;
+    public static javax.swing.JLabel lbLibro;
     private javax.swing.JLabel lbh;
     private static javax.swing.JLabel lbr;
     private javax.swing.JSpinner spn;

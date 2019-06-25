@@ -213,7 +213,7 @@ public class ConexiónBD {
     
     public void respaldarBD(){
         try {
-            Process p = Runtime.getRuntime().exec("C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysqldump -u root -proot libreriad");
+            Process p = Runtime.getRuntime().exec("C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysqldump -u root -pAlohomora21v libreriad");
             InputStream is = p.getInputStream();
             FileOutputStream fos = new FileOutputStream("respaldito.sql");
 
@@ -233,7 +233,7 @@ public class ConexiónBD {
     
     public void cargarBD(){
         try {
-            Process p = Runtime.getRuntime().exec("C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysql -u root -proot libreriad");
+            Process p = Runtime.getRuntime().exec("C:\\Program Files\\MySQL\\MySQL Server 5.7\\bin\\mysql -u root -pAlohomora21v libreriad");
             OutputStream os = p.getOutputStream();
             FileInputStream fis = new FileInputStream("respaldito.sql");
 

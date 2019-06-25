@@ -11,9 +11,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JLabel;
+import javax.swing.JButton;
 import static libreriad.Reloj.cadenaDig;
-import static libreriad.Reloj.setTime;
 import static libreriad.Reloj.timeSTI;
 
 /**
@@ -42,12 +41,13 @@ public class AlgoritmoBerkeley {
      * Tiempo de referencia para discriminar horas (En segundos)
      * 24 minutos
      */
-    final int TIMEREF = 24*60;
+    
+    final int TIMEREF = 60*60;
     public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
     final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
     final static int PTONVO = 2071; //Puerto definido para cuando un nodo nuevo inicia
-    ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/relojd"); //Objeto para usar la base de datos
-    final static String IPSERV = "192.168.1.67"; //Dirección ip del servidor de tiempo
+    ConexiónBD con = new ConexiónBD("root", "Alohomora21v", "jdbc:mysql://localhost:3306/relojd"); //Objeto para usar la base de datos
+    final static String IPSERV = "192.168.1.75"; //Dirección ip del servidor de tiempo
     public AlgoritmoBerkeley(){
         
     }
@@ -62,7 +62,7 @@ public class AlgoritmoBerkeley {
         //Tolerancia de 1 minuto
         y = 2*obtenerLatenciaMax()*TIMETOLERA;
         int aux = (y/1000*60);
-        TimeServer.lbtr.setText("asdasdas");
+        TimeServer.btnr.setText("asdasdas");
     }
     
     /**
@@ -161,14 +161,14 @@ public class AlgoritmoBerkeley {
      * 
      * Estado: Completo
      */
-    public void berkeley(JLabel lbr){
+    public void berkeley(JButton btn){
         Thread t = new Thread(new Runnable(){
                 @Override
                 public void run(){
                     while(true){
                         System.out.println("Inicia el algoritmo");
                         if(equipos.size()!=0){
-                            String aux = lbr.getText();//Tiempo "anterior" del algoritmo
+                            String aux = btn.getText();//Tiempo "anterior" del algoritmo
                             int time = timeASeg(aux); //Tiempo del servidor
                             int t=time, c=1; //C es un contador que indica cuantos equipos se usaron
                             ArrayList<Equipo> es = pedirHoras();
@@ -187,7 +187,7 @@ public class AlgoritmoBerkeley {
                             //Calcular el promedio
                             int prom = t/c;
                             //Actualizar el reloj
-                            lbr.setText(segATime(prom));
+                            //lbr.setText(segATime(prom));
                             //Calcular y enviar el ajuste de cada equipo
                             for(Equipo e : es){
                                 int timeE = timeASeg(e.gethEquipo());
@@ -203,6 +203,10 @@ public class AlgoritmoBerkeley {
                                 }
                                 enviaAjuste(e.getIp(),ajuste);
                             }
+                            //Reealentalizar el servidor de tiempo
+                            int ajuste = prom-time;
+                            if((ajuste*-1)>=(y/1000)/2) ajuste = -1*(((y/1000)/2)-3);
+                            ajusteLocal(ajuste, btn);
                             //Registrar en la BD
                             con.registrarHora(aux,segATime(prom), es);
                         }
@@ -220,6 +224,96 @@ public class AlgoritmoBerkeley {
         t.start();
     }
     
+    /**
+     * Ajusta el reloj local con base a un tiempo dado
+     * @param a tiempo de ajuste en segundos
+     * @param time hora actual del servidor
+     */
+    public void ajusteLocal(int ajuste, JButton btn){
+        String aux = btn.getText();//Tiempo "anterior" del algoritmo
+        int time = timeASeg(aux); //Tiempo del servidor en segundos
+        //String cadT = segATime(time);
+        //Relentizar el tiempo
+        System.out.println("\nEl ajuste recibido es de: "+ajuste+"\n");
+        if(ajuste<0){
+            ajuste*=-1;
+            System.out.println("ZA WARUDO TOKI WO TOMARE!");
+            //Relentelizar al 50%
+            TimeServer.lbs.setText((1000*2)+"");
+            setTime(aux,1000*2, btn);
+            try {
+                Thread.sleep(ajuste*2*1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            aux = btn.getText();
+            //Regresar al segundero normal
+            setTime(aux,1000, btn);
+            TimeServer.lbs.setText(1000+"");
+            System.out.println("Toki wa ugoki dasu");
+        }
+        //Adelantar el reloj
+        else if (ajuste>0){
+            //Cambiar la base de los segundos
+            //PE: 120seg = 2 min, 3600seg = 1 hora
+            Integer ti[] = timeSTI(segATime(ajuste));
+            //Variables de ajuste
+            int sa = ti[2];
+            int ma = ti[1];
+            int ha = ti[0];
+            ti = timeSTI(aux);
+            //Variables del tiempo original
+            int seg = ti[2];
+            int min = ti[1];
+            int hor = ti[0];
+            //RESPECTO AL SIGUIENTE CÓDIGO, ESTOY SEGURO QUE HAY UNA FORMA MAS ELEGANTE DE HACERLO 
+            //PERO ES SEMANA DE EVALUACIONES Y LA NETA TENGO SUEÑO. (H E L P)
+            if(seg+sa<60){
+                seg+=sa;
+                if(min+ma<60){
+                    min+=ma;
+                    hor+=ha;
+                }
+                else{
+                    min = ma-(60-min);
+                    if(hor+1+ha<24) hor+=ha+1;
+                    else{
+                        ha++;
+                        hor=ha-(24-hor);
+                    }
+                }
+            }
+            else{
+                seg=sa-(60-seg);
+                if(min+1+ma<60){
+                    min+=1+ma;
+                    hor+=ha;
+                }
+                else{
+                    ma++;
+                    min = ma-(60-min);
+                    if(hor+1+ha<24) hor+=1+ha;
+                    else{
+                        ha++;
+                        hor=ha-(24-hor);
+                    }
+                }
+            }
+            //if(ma==0 && sa==0) hor=ha-(24-hor);
+            String tim = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
+            System.out.println("El nuevo tiempo es "+tim);
+            setTime(tim,1000, btn);
+        }
+    }
+    
+    public static void setTime(String nvoTime, int seg, JButton b){
+        b.setText(nvoTime);
+        
+        //Nuevo valor del segundero
+        TimeServer.segundero = seg;
+    }    
+        
+        
     
     /**
      * Convierte una cadena de formato "hh:mm:ss" a un entero con los segundos totales
@@ -394,7 +488,7 @@ public class AlgoritmoBerkeley {
                                     ajuste*=-1;
                                     System.out.println("ZA WARUDO TOKI WO TOMARE!");
                                     //Relentelizar al 50%
-                                    setTime(msj, 0, 1000*2, true);
+                                    Reloj.setTime(msj, 0, 1000*2, true);
                                     try {
                                         Thread.sleep(ajuste*2*1000);
                                     } catch (InterruptedException ex) {
@@ -402,7 +496,7 @@ public class AlgoritmoBerkeley {
                                     }
                                     msj = MuestraImage.r1.getText();
                                     //Regresar al segundero normal
-                                    setTime(msj, 0, 1000, true);
+                                    Reloj.setTime(msj, 0, 1000, true);
                                     System.out.println("Toki wa ugoki dasu");
                                 }
                                 //Adelantar el reloj
@@ -423,7 +517,7 @@ public class AlgoritmoBerkeley {
                                     //PERO ES SEMANA DE EVALUACIONES Y LA NETA TENGO SUEÑO. (H E L P)
                                     if(seg+sa<60){
                                         seg+=sa;
-                                        if(min+sa<60){
+                                        if(min+ma<60){
                                             min+=ma;
                                             hor+=ha;
                                         }
@@ -452,10 +546,10 @@ public class AlgoritmoBerkeley {
                                             }
                                         }
                                     }
-                                    if(ma==0 && sa==0) hor=ha-(24-hor);
+                                    //if(ma==0 && sa==0) hor=ha-(24-hor);
                                     String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
                                     System.out.println("El nuevo tiempo es "+time);
-                                    setTime(time, 0, 1000, true);
+                                    Reloj.setTime(time, 0, 1000, true);
                                 }
                                 br.close();
                                 cl.close();

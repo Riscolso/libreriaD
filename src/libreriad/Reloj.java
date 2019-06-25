@@ -39,14 +39,15 @@ public class Reloj {
      * @param lbr label en donde se mostrará el reloj
      * @param segundero tiempo de espera entre aumento de segundos (en milisegundos)
      */
-    public void reloj(JLabel lbr, int segundero){
+    public void reloj(JButton lbr){
         Thread hilo = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     int seg, min, hor;
                     while(true){
-                        Thread.sleep(segundero);
+                        Thread.sleep(Integer.parseInt(TimeServer.lbs.getText()));
+                        //System.out.println("Vaalor segundero "+segundero);
                         String tiempo = lbr.getText();
                         String aux = tiempo;
 
