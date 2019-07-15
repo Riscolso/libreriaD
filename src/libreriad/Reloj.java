@@ -8,14 +8,19 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import static libreriad.MuestraImage.*;
 
 /**
- * Genera relojes y el control de estos ya sea local o remoto
- * @author potatOS
+ * Para generar un reloj se necesita crear una instancia de clase; objeto
+ * @author Ricardo :P
  */
 public class Reloj {
+    
+    /**
+     * Segundero de la instancia del reloj <br>
+     * 1000 significa retraso de 1 segundo entre cada actualización de segundos  
+     */
+    public int segundero = 1000;
     
     /*Arreglo con Todos los botones que muentran la hora
     Pa' modificarlos por bonche, mas fácil :)*/
@@ -27,46 +32,77 @@ public class Reloj {
     /**
      * Arreglo que contiene la velocidad de los segunderos de los relojs... o relojes?
      */
-    public static int segundero[];
+    public static int segunderos[];
     
     /**
      * Arreglo con el switch de encendido/apagado de los relojes.
      */
-    public static boolean on[];
+    public static boolean ons[];
     
     /**
-     * Liga un reloj a un label
+     * Switch de encendido/apagado del reloj. <br>
+     * Ya que el método para pausar hilos esta depreciado. Básicamente ahí :v
+     */
+    public static boolean on = true;
+    
+    /**
+     * Referencia al elemento gráfico ligado.
+     */
+    public static JButton btnr;
+    
+    
+    /**
+     * Crea una instancia de la clase lista para asignar un reloj
+     * (Con eso de que Java no permite herencia múltiple xD)
+     */
+    public Reloj(JButton jbtn, int segundero){
+        //Asignar el valor de retraso del segundero
+        this.segundero = segundero;
+        //Guardar la referencia al elemento gráfico; sirve para modificar la hora sin complicación
+        btnr = jbtn;
+    }
+    
+    public Reloj(){
+        
+    }
+    
+    /**
+     * Recibe un elemento gráfico de tipo botón y le asigna un reloj <br>
+     * El texto del botón debe ser inicializado en formato "hh:mm:ss" para funcionar <br>
+     * Para cambiar el tiempo basta solo con modificar el texto del botón o bien con {@link #setTime(java.lang.String, int, int, boolean) }
      * @param lbr label en donde se mostrará el reloj
      * @param segundero tiempo de espera entre aumento de segundos (en milisegundos)
      */
-    public void reloj(JButton lbr){
+    public void reloj(){
         Thread hilo = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     int seg, min, hor;
                     while(true){
-                        Thread.sleep(Integer.parseInt(TimeServer.lbs.getText()));
-                        //System.out.println("Vaalor segundero "+segundero);
-                        String tiempo = lbr.getText();
-                        String aux = tiempo;
+                        while(on){
+                            Thread.sleep(segundero);
+                            String tiempo = btnr.getText();
+                            String aux = tiempo;
 
-                        seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
-                        min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
-                        hor = Integer.parseInt(tiempo.substring(0,2));
-                        if(seg <59) seg++;
-                        else{
-                            seg=0;
-                            if(min<59) min++;
+                            seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
+                            min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
+                            hor = Integer.parseInt(tiempo.substring(0,2));
+                            if(seg <59) seg++;
                             else{
-                                min=0;
-                                if(hor<23) hor++;
-                                else hor=0;
+                                seg=0;
+                                if(min<59) min++;
+                                else{
+                                    min=0;
+                                    if(hor<23) hor++;
+                                    else hor=0;
+                                }
+                            }
+                            if(btnr.getText().equals(aux)){
+                                btnr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
                             }
                         }
-                        if(lbr.getText().equals(aux)){
-                            lbr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
-                        }
+                        System.out.print(""); //Permite el correcto funcionamiento del switch, ya que si no hace nada al parecer vale kk
                     }
                 } catch (Exception ex) {
                     System.out.println("Error en hilo: "+ex);
@@ -76,7 +112,20 @@ public class Reloj {
         hilo.start();
     }
     
-    //Todo lo relacionado con crear los relojes, su hora, los hilos que lo manejan ETC
+    /**
+     * Establecer nuevo segundero al reloj <br>
+     * NO actualiza los relojes de los clientes, multicast de java esta hecho basca
+     * @param seg velocidad del segundero en milisegundos
+     */
+    public void setTime(String nvoTime, int seg){
+        btnr.setText(nvoTime);
+        this.segundero = seg;
+    }
+    
+    /**
+     * Crea cuatro relojes a lo YOLO así todo feo xD
+     * @deprecated 
+     */
     public void iniciarRelojes(){
         
         //Llenar el arreglo de los botones
@@ -89,8 +138,8 @@ public class Reloj {
         //Instanciar la ventana de modificar
         
         tiempo = new String[4];
-        segundero = new int[4];
-        on = new boolean[4];
+        segunderos = new int[4];
+        ons = new boolean[4];
         Thread  hilo[] = new Thread[4];
         
         //Obtener la hora local para el primer reloj
@@ -106,9 +155,9 @@ public class Reloj {
             int e=i;
             
             //Encender todos los relojes
-            on[i] = true;
+            ons[i] = true;
             
-            segundero[i] = 1000;
+            segunderos[i] = 1000;
             
             //Código de cada reloj (Hilos)
             hilo[i] = new Thread(new Runnable() {
@@ -117,7 +166,7 @@ public class Reloj {
                     try {
                         int seg=0, min, hor;
                         while(true){
-                            while(on[e]){
+                            while(ons[e]){
 
                                 tiempo[e] = BRelojes[e].getText();
 
@@ -136,7 +185,7 @@ public class Reloj {
                                 }
 
                                 BRelojes[e].setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
-                                Thread.sleep(segundero[e]);
+                                Thread.sleep(segunderos[e]);
                             }
                         System.out.print("");
                         }
@@ -205,15 +254,16 @@ public class Reloj {
      * @param noReloj Número del reloj a modificar
      * @param seg Velocidad del segundero 1000 es normal, 500 es el doble de la velocidad
      * @param b True si debe ser enviado a los clientes del reloj especificado, false pos no.
+     * @deprecated Ya no se usa
      */
     public static void setTime(String nvoTime, int noReloj, int seg, boolean b){
         BRelojes[noReloj].setText(nvoTime);
         
         //Reanudar el reloj
-        on[noReloj] = true;
+        ons[noReloj] = true;
         
         //Nuevo valor del segundero
-        segundero[noReloj] = seg;
+        segunderos[noReloj] = seg;
         
         //Enviar el tiempo a los clientes
         //Si el servidor yá fue iniciado
@@ -235,8 +285,19 @@ public class Reloj {
      * @return Cadena formateada con dos digitos
      */
     public static String cadenaDig(int h){
-            if(h<10) return new String("0"+h);
-            else return new String(h+"");
+        if(h<10) return new String("0"+h);
+        else return new String(h+"");
+    }
+    
+    /**
+     * Otorga formato de doble digito sobre un solo número <br>
+     * Ósea que si le das un número de un dígito te regresa una cadena con un 0 antes :v
+     * @param h número de un solo digito a formatear
+     * @return Cadena formateada con dos digitos
+     */
+    public static String cadenaDig(String c){
+        if(c.length()<2) return new String("0"+c);
+        else return c;
     }
     
     /**

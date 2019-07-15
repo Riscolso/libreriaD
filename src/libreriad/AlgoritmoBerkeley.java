@@ -239,7 +239,10 @@ public class AlgoritmoBerkeley {
             ajuste*=-1;
             System.out.println("ZA WARUDO TOKI WO TOMARE!");
             //Relentelizar al 50%
-            TimeServer.lbs.setText((1000*2)+"");
+            
+            /*OJO AQUI-----------------------------*/
+            
+            //TimeServer.segundero.setText((1000*2)+"");
             setTime(aux,1000*2, btn);
             try {
                 Thread.sleep(ajuste*2*1000);
@@ -248,8 +251,9 @@ public class AlgoritmoBerkeley {
             }
             aux = btn.getText();
             //Regresar al segundero normal
-            setTime(aux,1000, btn);
-            TimeServer.lbs.setText(1000+"");
+            setTime(aux,1000, btn);/*OJO AQUI-----------------------------*/
+            
+            //TimeServer.lbs.setText(1000+"");
             System.out.println("Toki wa ugoki dasu");
         }
         //Adelantar el reloj
@@ -306,11 +310,18 @@ public class AlgoritmoBerkeley {
         }
     }
     
+    /**
+     * OJO AQUI
+     * @param nvoTime
+     * @param seg
+     * @param b 
+     */
     public static void setTime(String nvoTime, int seg, JButton b){
         b.setText(nvoTime);
         
         //Nuevo valor del segundero
-        TimeServer.segundero = seg;
+        //segundero = seg;
+        System.out.println("Valor segundo: "+seg);
     }    
         
         

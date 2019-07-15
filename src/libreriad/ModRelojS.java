@@ -2,22 +2,38 @@ package libreriad;
 
 import java.awt.Image;
 import java.awt.Toolkit;
-import static libreriad.AlgoritmoBerkeley.setTime;
-import static libreriad.TimeServer.btnr;
+import static libreriad.Reloj.cadenaDig;
 
-
-
+/**
+ * Interfaz gráfica para cambiar el valor de un reloj
+ * Tiene que tener un reloj asignado con A de A FUERZAS!.
+ * @author Ricardo RC
+ */
 public class ModRelojS extends javax.swing.JFrame {
-    //CODIGO PROPIO
-    private int noReloj; //El número de reloj que se esta modificando.
+    /**
+     * Reloj al cual modifica
+     */
+    private Reloj r;
     
-    
-    
-    //Si recibe un número de una dígito, lo regresa con un '0' a su izquierda
-    public String cadenaDig(String c){
-        if(c.length()<2) return new String("0"+c);
-        else return c;
+    /**
+     * Cambiar el reloj a controlar
+     * @param r Reloj nuevo a controlar
+     */
+    public void setReloj(Reloj r){
+        this.r=r;
     }
+    
+    /**
+     * Llena automáticamente los campos con la hora del reloj asociado
+     */
+    public void llenarCampos(){
+        Integer t[] = Reloj.timeSTI(r.btnr.getText());
+        seg.setValue(t[2]);
+        min.setValue(t[1]);
+        hor.setValue(t[0]);
+        this.segundero.setValue(r.segundero);
+    }
+    
     public ModRelojS() {
         initComponents();
     }
@@ -35,7 +51,6 @@ public class ModRelojS extends javax.swing.JFrame {
         segundero = new javax.swing.JSpinner();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        btnem = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(51, 51, 51));
         setIconImage(getIconImage());
@@ -69,13 +84,6 @@ public class ModRelojS extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Arial", 3, 24)); // NOI18N
         jLabel4.setText("Modificar");
 
-        btnem.setText("Modificar/enviar");
-        btnem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnemActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -99,13 +107,8 @@ public class ModRelojS extends javax.swing.JFrame {
                         .addComponent(jLabel4)
                         .addGap(139, 139, 139))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addGap(30, 30, 30))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnem)
-                                .addGap(18, 18, 18)))
+                        .addComponent(jLabel3)
+                        .addGap(30, 30, 30)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
@@ -130,9 +133,7 @@ public class ModRelojS extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(segundero, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(btnem))
+                .addComponent(jButton1)
                 .addContainerGap(18, Short.MAX_VALUE))
         );
 
@@ -141,21 +142,14 @@ public class ModRelojS extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         //Establecer la nueva hora
-        setTime(cadenaDig(hor.getValue().toString())+":"
+        r.setTime(cadenaDig(hor.getValue().toString())+":"
                 +cadenaDig(min.getValue().toString())+":"
-                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""), btnr);
+                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""));
+        //Reanudar el reloj (TOKI WA UGOKIDASU)
+        r.on = true;
         //Ocultar la ventana
         this.setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void btnemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnemActionPerformed
-        //Establecer la nueva hora
-        setTime(cadenaDig(hor.getValue().toString())+":"
-                +cadenaDig(min.getValue().toString())+":"
-                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""), btnr);
-        //Ocultar la ventana
-        this.setVisible(false);
-    }//GEN-LAST:event_btnemActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -200,7 +194,6 @@ public class ModRelojS extends javax.swing.JFrame {
         return retValue;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnem;
     private javax.swing.JSpinner hor;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

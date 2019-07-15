@@ -414,27 +414,27 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     private void r1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r1ActionPerformed
         //Pausar el hilo
         //El método suspend esta depreciado xD
-        r.on[0] = false;
+        r.ons[0] = false;
         //Mandar tiempo y no de reloj al otr frame
-        mr.setTimeM(r.tiempo[0], 0, r.segundero[0]);
+        mr.setTimeM(r.tiempo[0], 0, r.segunderos[0]);
         mr.setVisible(true);
     }//GEN-LAST:event_r1ActionPerformed
 
     private void r2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r2ActionPerformed
-        r.on[1] = false;
-        mr.setTimeM(r.tiempo[1], 1, r.segundero[1]);
+        r.ons[1] = false;
+        mr.setTimeM(r.tiempo[1], 1, r.segunderos[1]);
         mr.setVisible(true);
     }//GEN-LAST:event_r2ActionPerformed
 
     private void r3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r3ActionPerformed
-        r.on[2] = false;
-        mr.setTimeM(r.tiempo[2], 2, r.segundero[2]);
+        r.ons[2] = false;
+        mr.setTimeM(r.tiempo[2], 2, r.segunderos[2]);
         mr.setVisible(true);
     }//GEN-LAST:event_r3ActionPerformed
 
     private void r4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r4ActionPerformed
-        r.on[3] = false;
-        mr.setTimeM(r.tiempo[3], 3, r.segundero[3]);
+        r.ons[3] = false;
+        mr.setTimeM(r.tiempo[3], 3, r.segunderos[3]);
         mr.setVisible(true);
     }//GEN-LAST:event_r4ActionPerformed
 
