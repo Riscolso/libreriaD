@@ -468,7 +468,7 @@ public class AlgoritmoBerkeley {
      * 
      * Estado: Completo
      */
-    public static void hiloEscuchaHora(){
+    public static void hiloEscuchaHora(Reloj rej){
         Thread t = new Thread(new Runnable(){
                 @Override
                 public void run(){
@@ -499,7 +499,7 @@ public class AlgoritmoBerkeley {
                                     ajuste*=-1;
                                     System.out.println("ZA WARUDO TOKI WO TOMARE!");
                                     //Relentelizar al 50%
-                                    Reloj.setTime(msj, 0, 1000*2, true);
+                                    rej.setTime(msj,1000*2);
                                     try {
                                         Thread.sleep(ajuste*2*1000);
                                     } catch (InterruptedException ex) {
@@ -507,7 +507,7 @@ public class AlgoritmoBerkeley {
                                     }
                                     msj = MuestraImage.r1.getText();
                                     //Regresar al segundero normal
-                                    Reloj.setTime(msj, 0, 1000, true);
+                                    rej.setTime(msj,1000);
                                     System.out.println("Toki wa ugoki dasu");
                                 }
                                 //Adelantar el reloj
@@ -560,7 +560,7 @@ public class AlgoritmoBerkeley {
                                     //if(ma==0 && sa==0) hor=ha-(24-hor);
                                     String time = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
                                     System.out.println("El nuevo tiempo es "+time);
-                                    Reloj.setTime(time, 0, 1000, true);
+                                    rej.setTime(time,1000);
                                 }
                                 br.close();
                                 cl.close();

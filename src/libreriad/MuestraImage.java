@@ -11,10 +11,6 @@
 //Apagar el servidor de libros si no es el coordinador
 //Apagar el servidor de listas
 
-
-//Poner atención en los try-catch de los hiles infinitos (tal vez por eso no funcione bien)
-//Yeah
-
 //Replicación
 //Qué pasa si lo que responde el secundario no es Chido (Y)
 
@@ -24,7 +20,6 @@
 /*
 -Variables estaticas a la clase libreriaD
 -Actualizar segunderos en los clientes
--Crear relojes independientes
 */
 
 
@@ -42,15 +37,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import static libreriad.TimeServer.btnr;
 
 public class MuestraImage extends javax.swing.JFrame implements Serializable {
     
     //Número de libros disponibles para distribuir
     public static int noLibros;
-    ModReloj mr;
     
     //Multicast - relojes
     public static InetAddress gpo = null;
@@ -60,14 +60,15 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     static DatagramPacket p = null;
     
     //Para base de datos
-    public static ConexiónBD con = new ConexiónBD("root", "Alohomora21v", "jdbc:mysql://localhost:3306/libreriad");
-    public static ConexiónBD con2 = new ConexiónBD("root", "Alohomora21v", "jdbc:mysql://localhost:3306");
+    public static ConexiónBD con = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306/libreriad");
+    public static ConexiónBD con2 = new ConexiónBD("root", "root", "jdbc:mysql://localhost:3306");
     
     public static boolean procesando = false;
     //Algoritmo de Berkeley
     AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
-    //Relojes
-    Reloj r = new Reloj();
+    //Reloj y su mod
+    Reloj r;
+    ModRelojS mr;
     //Algoritmo de anillo
     AlgoritmoAnillo aa = new AlgoritmoAnillo();
     //Replicación primaria
@@ -112,20 +113,28 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         this.setTitle("Coordinador");
         setLocationRelativeTo(this);
         btnReIni.setVisible(true);
-        mr = new ModReloj();
-        
-        r2.setVisible(false);
-        r3.setVisible(false);
-        r4.setVisible(false);
-        //Código para los relojes
-        r.iniciarRelojes();
+        //Establecer la hora actual
+        Date date = new Date();
+        DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
+        r1.setText(hourFormat.format(date));
+        //Instanciar el reloj
+        r = new Reloj(r1, 1000);
+        //Dar ID del reloj para multicast
+        r.noReloj = 0;
+        //Instanciar el modificardor de reloj
+        mr = new ModRelojS();
+        //Vincular el modificador de reloj con el reloj
+        mr.setReloj(r);
+        //Iniciar reloj
+        r.reloj();
         
         
         try {
             //Saber cuál es el nombre de la máquina
             //Suponiendo que todos tienen un número de nombre xD
             String aux = InetAddress.getLocalHost().getHostName()+"";
-            aa.name = Integer.parseInt(aux.charAt(1)+"");
+            //aa.name = Integer.parseInt(aux.charAt(1)+"");
+            aa.name = 1;
             System.out.println("Mi nombre "+aa.name);
         } catch (UnknownHostException ex) {
             System.out.println("Error al obtener mi nombre... Who am i?: "+ ex);
@@ -137,14 +146,19 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         aa.vivo();
         
         //Servidor de las peticiones de libro
-        lro.servidorPeticiones();
+        //El parámetro es la hora con la que se registran los prestamos
+        lro.servidorPeticiones(r1);
         
-        //Cargar los siguientes de una archivo
+        //Cargar los siguientes de un archivo
         //Si esta vacío es la primera vez que aparece el nodo
         aa.namae = aa.cargarLista();
         
-        //Iniciar servidor de relojes
-        r.servidorRelojes();
+        //Preparar un arreglo con los relojes del coordinador
+        ArrayList<JButton> rs = new ArrayList<JButton>();
+        rs.add(r1);
+        
+        //Registrar los relojes almacenados anteriormente para iniciar servidor de relojes
+        r.servidorRelojes(rs);
         
         //Iniciar el canal de comunicación que envía cuando hay nuevo coordinador a los FE
         aa.iniciarMulti();
@@ -205,7 +219,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         lbLibros.setText("Libros disponibles: "+ noLibros);
         //Activar el AlgoritmoBerkeley
         AlgoritmoBerkeley.presentarse();
-        AlgoritmoBerkeley.hiloEscuchaHora();
+        AlgoritmoBerkeley.hiloEscuchaHora(r);
     }
 
     @SuppressWarnings("unchecked")
@@ -216,9 +230,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         jMuestraLibro = new javax.swing.JLabel();
         jSalir = new javax.swing.JButton();
         r1 = new javax.swing.JButton();
-        r2 = new javax.swing.JButton();
-        r3 = new javax.swing.JButton();
-        r4 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         btnReIni = new javax.swing.JButton();
         lbLibros = new javax.swing.JLabel();
@@ -251,43 +262,6 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         r1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 r1ActionPerformed(evt);
-            }
-        });
-
-        r2.setBackground(new java.awt.Color(255, 255, 255));
-        r2.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        r2.setForeground(new java.awt.Color(255, 255, 255));
-        r2.setText("00:00:00");
-        r2.setBorderPainted(false);
-        r2.setContentAreaFilled(false);
-        r2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        r2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                r2ActionPerformed(evt);
-            }
-        });
-
-        r3.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        r3.setForeground(new java.awt.Color(255, 255, 255));
-        r3.setText("00:00:00");
-        r3.setBorderPainted(false);
-        r3.setContentAreaFilled(false);
-        r3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        r3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                r3ActionPerformed(evt);
-            }
-        });
-
-        r4.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        r4.setForeground(new java.awt.Color(255, 255, 255));
-        r4.setText("00:00:00");
-        r4.setBorderPainted(false);
-        r4.setContentAreaFilled(false);
-        r4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        r4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                r4ActionPerformed(evt);
             }
         });
 
@@ -332,25 +306,17 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(45, 45, 45)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(r1)
-                                    .addComponent(r3)))
+                                .addComponent(r1))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(58, 58, 58)
                                 .addComponent(jLabel2)))
-                        .addGap(18, 18, 18)
+                        .addGap(46, 46, 46)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(12, 12, 12)
-                                .addComponent(lbLibros, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jMuestraLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(r4)
-                                    .addComponent(r2))))))
-                .addContainerGap(31, Short.MAX_VALUE))
+                                .addComponent(lbLibros, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jMuestraLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(122, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(0, 179, Short.MAX_VALUE)
                 .addComponent(jNomLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -361,30 +327,19 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGap(14, 14, 14)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(59, 59, 59)
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(r1)
-                                .addGap(110, 110, 110)
-                                .addComponent(r3))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jNomLibro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jSalir))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jMuestraLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(59, 59, 59)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(r1))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(108, 108, 108)
-                        .addComponent(r2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(r4)
-                        .addGap(64, 64, 64)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jNomLibro, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSalir))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jMuestraLibro, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addComponent(lbLibros, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -412,31 +367,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     }//GEN-LAST:event_jSalirActionPerformed
 
     private void r1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r1ActionPerformed
-        //Pausar el hilo
-        //El método suspend esta depreciado xD
-        r.ons[0] = false;
-        //Mandar tiempo y no de reloj al otr frame
-        mr.setTimeM(r.tiempo[0], 0, r.segunderos[0]);
+        mr.llenarCampos();
+        //Pausar el reloj (ZA WARUDO!!!!!)
+        r.on = false;
         mr.setVisible(true);
     }//GEN-LAST:event_r1ActionPerformed
-
-    private void r2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r2ActionPerformed
-        r.ons[1] = false;
-        mr.setTimeM(r.tiempo[1], 1, r.segunderos[1]);
-        mr.setVisible(true);
-    }//GEN-LAST:event_r2ActionPerformed
-
-    private void r3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r3ActionPerformed
-        r.ons[2] = false;
-        mr.setTimeM(r.tiempo[2], 2, r.segunderos[2]);
-        mr.setVisible(true);
-    }//GEN-LAST:event_r3ActionPerformed
-
-    private void r4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_r4ActionPerformed
-        r.ons[3] = false;
-        mr.setTimeM(r.tiempo[3], 3, r.segunderos[3]);
-        mr.setVisible(true);
-    }//GEN-LAST:event_r4ActionPerformed
 
     private void btnReIniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReIniActionPerformed
         
@@ -507,8 +442,5 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     private javax.swing.JButton jSalir;
     public static javax.swing.JLabel lbLibros;
     public static javax.swing.JButton r1;
-    public static javax.swing.JButton r2;
-    public static javax.swing.JButton r3;
-    public static javax.swing.JButton r4;
     // End of variables declaration//GEN-END:variables
 }

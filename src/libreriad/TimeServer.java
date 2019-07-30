@@ -41,7 +41,7 @@ public class TimeServer extends javax.swing.JFrame {
         r = new Reloj(btnr, 1000);
         //Instanciar el modificardor de reloj
         mr = new ModRelojS();
-        //Vincular el modificador de reloj con el reloj; ya sé que es mucha vuelta, pero así permite la herencia múltiple xD
+        //Vincular el modificador de reloj con el reloj
         mr.setReloj(r);
         
         //Iniciar reloj
