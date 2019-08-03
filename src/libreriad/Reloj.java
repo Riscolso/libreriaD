@@ -1,72 +1,103 @@
 package libreriad;
 
+/*
+FALTA
+-Cerrar los sockets cuando se salga del programa
+-Actualizar segunderos en los clientes
+*/
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import static libreriad.MuestraImage.*;
 
 /**
- * Genera relojes y el control de estos ya sea local o remoto
- * @author potatOS
+ * Para generar un reloj se necesita crear una instancia de clase; objeto
+ * @author Ricardo :P
  */
 public class Reloj {
-    
-    /*Arreglo con Todos los botones que muentran la hora
-    Pa' modificarlos por bonche, mas fácil :)*/
-    public static JButton BRelojes[];
     /**
-     * Arreglo que contiene los 4 tiempos de los relojes en formato hh:mm:ss
+     * Identificador de reloj, solo se usa en caso de que se use el multicast
      */
-    public static String tiempo[];
-    /**
-     * Arreglo que contiene la velocidad de los segunderos de los relojs... o relojes?
-     */
-    public static int segundero[];
+    public int noReloj;
     
     /**
-     * Arreglo con el switch de encendido/apagado de los relojes.
+     * Segundero de la instancia del reloj <br>
+     * 1000 significa retraso de 1 segundo entre cada actualización de segundos  
      */
-    public static boolean on[];
+    public int segundero = 1000;
+    
     
     /**
-     * Liga un reloj a un label
-     * @param lbr label en donde se mostrará el reloj
-     * @param segundero tiempo de espera entre aumento de segundos (en milisegundos)
+     * Switch de encendido/apagado del reloj. <br>
+     * Ya que el método para pausar hilos esta depreciado. Básicamente ahí :v
      */
-    public void reloj(JButton lbr){
+    public static boolean on = true;
+    
+    /**
+     * Referencia al elemento gráfico ligado.
+     */
+    public static JButton btnr;
+    
+    
+    /**
+     * Crea una instancia de la clase lista para asignar un reloj
+     * (Con eso de que Java no permite herencia múltiple xD)
+     * @param jbtn Elemento gráfico ligado al reloj (Por ahora solo Botones)
+     * @param segundero Velocidad del segundero; 1000 = 1 segundo
+     */
+    public Reloj(JButton jbtn, int segundero){
+        //Asignar el valor de retraso del segundero
+        this.segundero = segundero;
+        //Guardar la referencia al elemento gráfico; sirve para modificar la hora sin complicación
+        btnr = jbtn;
+    }
+    
+    public Reloj(){
+        
+    }
+    
+    /**
+     * Para usar este método primero se debe haber dado un valor a la variable btnr, el cual es el botón con el reloj <br>
+     * El texto del botón debe ser inicializado en formato "hh:mm:ss" para funcionar <br>
+     * Para cambiar el tiempo basta solo con modificar el texto del botón o bien con {@link #setTime(java.lang.String, int)  }
+     */
+    public void reloj(){
         Thread hilo = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     int seg, min, hor;
                     while(true){
-                        Thread.sleep(Integer.parseInt(TimeServer.lbs.getText()));
-                        //System.out.println("Vaalor segundero "+segundero);
-                        String tiempo = lbr.getText();
-                        String aux = tiempo;
+                        while(on){
+                            Thread.sleep(segundero);
+                            String tiempo = btnr.getText();
+                            String aux = tiempo;
 
-                        seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
-                        min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
-                        hor = Integer.parseInt(tiempo.substring(0,2));
-                        if(seg <59) seg++;
-                        else{
-                            seg=0;
-                            if(min<59) min++;
+                            seg = Integer.parseInt(tiempo.substring(tiempo.lastIndexOf(":")+1));
+                            min = Integer.parseInt(tiempo.substring(tiempo.indexOf(":")+1,tiempo.lastIndexOf(":")));
+                            hor = Integer.parseInt(tiempo.substring(0,2));
+                            if(seg <59) seg++;
                             else{
-                                min=0;
-                                if(hor<23) hor++;
-                                else hor=0;
+                                seg=0;
+                                if(min<59) min++;
+                                else{
+                                    min=0;
+                                    if(hor<23) hor++;
+                                    else hor=0;
+                                }
+                            }
+                            if(btnr.getText().equals(aux)){
+                                btnr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
                             }
                         }
-                        if(lbr.getText().equals(aux)){
-                            lbr.setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
-                        }
+                        System.out.print(""); //Permite el correcto funcionamiento del switch, ya que si no hace nada al parecer vale kk
                     }
                 } catch (Exception ex) {
                     System.out.println("Error en hilo: "+ex);
@@ -76,91 +107,34 @@ public class Reloj {
         hilo.start();
     }
     
-    //Todo lo relacionado con crear los relojes, su hora, los hilos que lo manejan ETC
-    public void iniciarRelojes(){
-        
-        //Llenar el arreglo de los botones
-        BRelojes = new JButton[4];
-        BRelojes[0] = r1;
-        BRelojes[1] = r2;
-        BRelojes[2] = r3;
-        BRelojes[3] = r4;
-        
-        //Instanciar la ventana de modificar
-        
-        tiempo = new String[4];
-        segundero = new int[4];
-        on = new boolean[4];
-        Thread  hilo[] = new Thread[4];
-        
-        //Obtener la hora local para el primer reloj
-        Date date = new Date();
-        DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
-        BRelojes[0].setText(hourFormat.format(date));
-        int i;
-        for(i=0;i<4;i++){
-            //Todos los relojes online disponibles
-            //reonline[i]= false;
-            
-            //Tener la variable e evita que los hilos se declaren con el mismo valor de i = 3
-            int e=i;
-            
-            //Encender todos los relojes
-            on[i] = true;
-            
-            segundero[i] = 1000;
-            
-            //Código de cada reloj (Hilos)
-            hilo[i] = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        int seg=0, min, hor;
-                        while(true){
-                            while(on[e]){
-
-                                tiempo[e] = BRelojes[e].getText();
-
-                                seg = Integer.parseInt(tiempo[e].substring(tiempo[e].lastIndexOf(":")+1));
-                                min = Integer.parseInt(tiempo[e].substring(tiempo[e].indexOf(":")+1,tiempo[e].lastIndexOf(":")));
-                                hor = Integer.parseInt(tiempo[e].substring(0,2));
-                                if(seg <59) seg++;
-                                else{
-                                    seg=0;
-                                    if(min<59) min++;
-                                    else{
-                                        min=0;
-                                        if(hor<23) hor++;
-                                        else hor=0;
-                                    }
-                                }
-
-                                BRelojes[e].setText(cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg));
-                                Thread.sleep(segundero[e]);
-                            }
-                        System.out.print("");
-                        }
-                        } catch (Exception ex) {
-                            System.out.println("Error en hilo "+e+": "+ex);
-                        }
-                }
-            });
-            
-            
-            //Iniciar los hilos
-            hilo[i].start();
-            
-        }
-        
-        //Asignar hora random a los demás relojes
-        for(int j=1;j<4;j++)
-            setTime(cadenaDig((int) (Math.random() * 23))+":"+
-                    cadenaDig((int) (Math.random() * 59))+":"+
-                    cadenaDig((int) (Math.random() * 59)), j, 1000, false);
+    /**
+     * Establecer nuevo segundero al reloj <br>
+     * NO actualiza los relojes de los clientes, multicast de java esta hecho basca, así que se debe usar {@link #enviarTime() } para eso.
+     * @param nvoTime Nuevo hora en formato "hh:mm:ss"
+     * @param seg velocidad del segundero en milisegundos
+     */
+    public void setTime(String nvoTime, int seg){
+        btnr.setText(nvoTime);
+        this.segundero = seg;
+    }
+    /**
+     * Regresa la hora actual del reloj
+     * @return Pues eso mismo xD
+     */
+    public String getTime(){
+        return btnr.getText();
     }
     
-    //Ejecutable del hilo que actualiza el tiempo en relojes cliente - Multicast
-    public void servidorRelojes(){
+    /**
+     * Servidor de sincronización entre el coordinador y los clientes <br>
+     * Se deben agregar todos los botones de los relojes al inicio, ya que después no se podrán sumar <br>
+     * Se supone que funciona para n coordinadores y no importa las veces que se caigan o levanten...<br>
+     * Se supone, lo dice en la doc de java sobre los multicast, pero no funciona bien, solo cuando quiere xD <br>
+     * Activar solo un servidor por cada coordinador.
+     * @param relojes Arreglo con todos los los relojes del coordinador <br>
+     * ordenador ascendentemente
+     */
+    public static void servidorRelojes(ArrayList<JButton> relojes){
         Thread h = new Thread(new Runnable(){
             @Override
             public void run() {
@@ -175,20 +149,28 @@ public class Reloj {
                     //Recibir peticiones
                     //Datagrama para recibir
                     DatagramPacket rec = new DatagramPacket(new byte[20], 20);
+                    
+                    //Configurado para enviar a los clientes que estén suscritos al puerto 4000
+                    String msj = "The cake is a lie";
                     //Datagrama para enviar
-                    //Envia a los que esten suscritos al puerto 4000
-                    p = new DatagramPacket(tiempo[0].getBytes(),tiempo[0].getBytes().length,gpo,4000);
+                    p = new DatagramPacket(msj.getBytes(),msj.getBytes().length,gpo,4000);
                     
                     while(true){
                         s.receive(rec);
                         System.out.println("Me llegó una petición de reloj "+ new String(rec.getData()));
                         String aux = new String(rec.getData());
+                        //El primer símbolo del mensaje es un c, indica que es de un cliente
                         if(aux.charAt(0)=='c'){
-                            //Enviar la hora del número que pidió el usuario
-                            String msj = new String(tiempo[Integer.parseInt(aux.substring(1,2))]+aux.substring(1,2));
-                            System.out.println("Voy a enviar "+msj);
-                            p.setData(msj.getBytes());
-                            s.send(p);
+                            //El segundo caracter es el número de reloj que se pide
+                            int no = Integer.parseInt(aux.substring(1,2));
+                            if(no+1>relojes.size()) System.out.println("Me pidieron un reloj que no tengo, WTF?");
+                            else{
+                                //Enviar la hora del número que pidió el usuario
+                                msj = new String(relojes.get(no).getText()+no);
+                                System.out.println("Voy a enviar "+msj);
+                                p.setData(msj.getBytes());
+                                s.send(p);
+                            }
                         }
                     }
                 }catch(Exception e){
@@ -199,29 +181,20 @@ public class Reloj {
         h.start();
     }
     
+    
     /**
-     * Establece un nuevo valor para uno de los relojes, así como su velocidad y si los cambios deben ser enviados a los clientes
-     * @param nvoTime Nuevo tiempo del reloj
-     * @param noReloj Número del reloj a modificar
-     * @param seg Velocidad del segundero 1000 es normal, 500 es el doble de la velocidad
-     * @param b True si debe ser enviado a los clientes del reloj especificado, false pos no.
+     * Actualiza el tiempo del relojs actual en los clientes <br>
+     * Recuerda que cada reloj tiene que tener un noReloj para poder enviar sus horas<br>
+     * No modifica la velocidad del segundero por que se me olvidó.. y me dio hueva agregarlo después, siente libre de hacerlo si quieres ;D
      */
-    public static void setTime(String nvoTime, int noReloj, int seg, boolean b){
-        BRelojes[noReloj].setText(nvoTime);
-        
-        //Reanudar el reloj
-        on[noReloj] = true;
-        
-        //Nuevo valor del segundero
-        segundero[noReloj] = seg;
-        
+    public void enviarTime(){
         //Enviar el tiempo a los clientes
         //Si el servidor yá fue iniciado
-        if(p!=null && b){
-            p.setData((nvoTime+noReloj).getBytes());
+        if(p!=null){
+            p.setData((btnr.getText()+noReloj).getBytes());
             try {
                 s.send(p);
-                System.out.println("Envio "+nvoTime+noReloj );
+                System.out.println("Envio "+(btnr.getText()+noReloj) );
             } catch (IOException ex) {
                 System.out.println("Error en envio "+ ex);
             }
@@ -235,8 +208,19 @@ public class Reloj {
      * @return Cadena formateada con dos digitos
      */
     public static String cadenaDig(int h){
-            if(h<10) return new String("0"+h);
-            else return new String(h+"");
+        if(h<10) return new String("0"+h);
+        else return new String(h+"");
+    }
+    
+    /**
+     * Otorga formato de doble digito sobre un solo número <br>
+     * Ósea que si le das un número de un dígito te regresa una cadena con un 0 antes :v
+     * @param c número de un solo digito a formatear
+     * @return Cadena formateada con dos digitos
+     */
+    public static String cadenaDig(String c){
+        if(c.length()<2) return new String("0"+c);
+        else return c;
     }
     
     /**

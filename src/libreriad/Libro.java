@@ -10,10 +10,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import static libreriad.MuestraImage.*;
 import static libreriad.Replicacion.*;
-import static libreriad.Reloj.tiempo;
 
 public class Libro implements Serializable{
     int ISBN;
@@ -30,7 +30,11 @@ public class Libro implements Serializable{
     }
     
     //Hilo de las peticiones de libros
-    public void servidorPeticiones(){
+    /**
+     * Servidor de las peticiones de libros
+     * @param hora Botón con la hora que se van a registrar los libros en el BD
+     */
+    public void servidorPeticiones(JButton hora){
         Thread hilo = new Thread(new Runnable(){
             @Override
             public void run() {
@@ -56,7 +60,7 @@ public class Libro implements Serializable{
                             //p.setLibro(obtenerNombreLibro());
 
                             //Establecer la hora local
-                            p.setHora(tiempo[0]);
+                            p.setHora(hora.getText());
                             //Aquí checa la disponibilidad del libro gg.
                             while(true){
                                 int aux = idLibro();

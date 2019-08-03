@@ -2,22 +2,38 @@ package libreriad;
 
 import java.awt.Image;
 import java.awt.Toolkit;
-import static libreriad.AlgoritmoBerkeley.setTime;
-import static libreriad.TimeServer.btnr;
+import static libreriad.Reloj.cadenaDig;
 
-
-
+/**
+ * Interfaz gráfica para cambiar el valor de un reloj
+ * Tiene que tener un reloj asignado con A de A FUERZAS!.
+ * @author Ricardo RC
+ */
 public class ModRelojS extends javax.swing.JFrame {
-    //CODIGO PROPIO
-    private int noReloj; //El número de reloj que se esta modificando.
+    /**
+     * Reloj al cual modifica
+     */
+    private Reloj r;
     
-    
-    
-    //Si recibe un número de una dígito, lo regresa con un '0' a su izquierda
-    public String cadenaDig(String c){
-        if(c.length()<2) return new String("0"+c);
-        else return c;
+    /**
+     * Cambiar el reloj a controlar
+     * @param r Reloj nuevo a controlar
+     */
+    public void setReloj(Reloj r){
+        this.r=r;
     }
+    
+    /**
+     * Llena automáticamente los campos con la hora del reloj asociado
+     */
+    public void llenarCampos(){
+        Integer t[] = Reloj.timeSTI(r.btnr.getText());
+        seg.setValue(t[2]);
+        min.setValue(t[1]);
+        hor.setValue(t[0]);
+        this.segundero.setValue(r.segundero);
+    }
+    
     public ModRelojS() {
         initComponents();
     }
@@ -105,7 +121,7 @@ public class ModRelojS extends javax.swing.JFrame {
                                 .addGap(30, 30, 30))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnem)
-                                .addGap(18, 18, 18)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
@@ -141,18 +157,24 @@ public class ModRelojS extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         //Establecer la nueva hora
-        setTime(cadenaDig(hor.getValue().toString())+":"
+        r.setTime(cadenaDig(hor.getValue().toString())+":"
                 +cadenaDig(min.getValue().toString())+":"
-                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""), btnr);
+                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""));
+        //Reanudar el reloj (TOKI WA UGOKIDASU)
+        r.on = true;
         //Ocultar la ventana
         this.setVisible(false);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void btnemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnemActionPerformed
         //Establecer la nueva hora
-        setTime(cadenaDig(hor.getValue().toString())+":"
+        r.setTime(cadenaDig(hor.getValue().toString())+":"
                 +cadenaDig(min.getValue().toString())+":"
-                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""), btnr);
+                +cadenaDig(seg.getValue().toString()), Integer.parseInt(segundero.getValue()+""));
+        //Reanudar el reloj (TOKI WA UGOKIDASU)
+        r.on = true;
+        //Enviar la hora
+        r.enviarTime();
         //Ocultar la ventana
         this.setVisible(false);
     }//GEN-LAST:event_btnemActionPerformed

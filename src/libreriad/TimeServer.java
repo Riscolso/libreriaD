@@ -17,34 +17,46 @@ import java.util.Date;
 * @since   2019-04-05
 */
 public class TimeServer extends javax.swing.JFrame {
-    AlgoritmoBerkeley ab; //Todo lo relacionado con el algoritmo
     /**
-     * Velocidad del segundero del reloj
+     * Todo lo relacionado con el algoritmo
      */
-    public static int segundero = 1000;
+    AlgoritmoBerkeley ab;
     
     ModRelojS mr;
 
-    Reloj r = new Reloj();
+    /**
+     * Reloj corriendo en el botón
+     */
+    Reloj r;
+    
     public TimeServer() {
         initComponents();
         this.setTitle("Servidor de Tiempo");
-        lbs.setVisible(false);
-        mr = new ModRelojS();
-        //Establecer la hora actual en el label de tiempo
+        
+        //Establecer la hora actual
         Date date = new Date();
         DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
         btnr.setText(hourFormat.format(date));
-        //Iniciar el reloj
-        r.reloj(btnr);
+        
+        //Instanciar el reloj
+        r = new Reloj(btnr, 1000);
+        //Instanciar el modificardor de reloj
+        mr = new ModRelojS();
+        //Vincular el modificador de reloj con el reloj
+        mr.setReloj(r);
+        
+        //Iniciar reloj
+        r.reloj();
+        
         ab = new AlgoritmoBerkeley();
+        
+        //Ahí el nombre dice qué hace xD
         ab.hiloEscuchaEquipos();
-        ab.berkeley(btnr);
+        
+        //Iniciar el algoritmo de Berkeley
+        ab.berkeley(r);
     }
     
-    public static void setTime(String t){
-        btnr.setText(t);
-    }
 
     
     @SuppressWarnings("unchecked")
@@ -53,12 +65,12 @@ public class TimeServer extends javax.swing.JFrame {
 
         jPanel2 = new javax.swing.JPanel();
         btnr = new javax.swing.JButton();
-        lbs = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         jPanel2.setBackground(new java.awt.Color(51, 0, 102));
-        jPanel2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jPanel2.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         btnr.setBackground(new java.awt.Color(255, 255, 255));
         btnr.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
@@ -68,14 +80,12 @@ public class TimeServer extends javax.swing.JFrame {
         btnr.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         btnr.setBorderPainted(false);
         btnr.setContentAreaFilled(false);
-        btnr.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnr.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnrActionPerformed(evt);
             }
         });
-
-        lbs.setText("1000");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -83,9 +93,7 @@ public class TimeServer extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(98, 98, 98)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lbs)
-                    .addComponent(btnr, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(btnr, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(92, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -93,9 +101,7 @@ public class TimeServer extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(25, 25, 25)
                 .addComponent(btnr, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lbs)
-                .addGap(25, 25, 25))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -113,8 +119,10 @@ public class TimeServer extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnrActionPerformed
+        mr.llenarCampos();
+        //Pausar el reloj (ZA WARUDO!!!!!)
+        r.on = false;
         mr.setVisible(true);
-        
     }//GEN-LAST:event_btnrActionPerformed
 
     /**
@@ -155,6 +163,5 @@ public class TimeServer extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public static javax.swing.JButton btnr;
     private javax.swing.JPanel jPanel2;
-    public static javax.swing.JLabel lbs;
     // End of variables declaration//GEN-END:variables
 }
