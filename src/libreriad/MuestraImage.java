@@ -1,5 +1,6 @@
-//Cerrar los sockets cuando se salga del programa
-//Servidor enviar no disponibilidad - Cliente recibir trama
+
+
+//PUERTOS
 //Puerto para peticiones 1234
 //Puerto para replicas 2065
 //Puerto para elecciones 2066
@@ -14,13 +15,6 @@
 //Replicación
 //Qué pasa si lo que responde el secundario no es Chido (Y)
 
-
-
-
-/*
--Variables estaticas a la clase libreriaD
--Actualizar segunderos en los clientes
-*/
 
 
 
@@ -66,9 +60,11 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
     public static boolean procesando = false;
     //Algoritmo de Berkeley
     AlgoritmoBerkeley ab = new AlgoritmoBerkeley();
-    //Reloj y su mod
-    Reloj r;
-    ModRelojS mr;
+    /**
+     * El reloj y su modificador
+     */
+    public Reloj r;
+    public ModRelojS mr;
     //Algoritmo de anillo
     AlgoritmoAnillo aa = new AlgoritmoAnillo();
     //Replicación primaria
@@ -133,8 +129,7 @@ public class MuestraImage extends javax.swing.JFrame implements Serializable {
             //Saber cuál es el nombre de la máquina
             //Suponiendo que todos tienen un número de nombre xD
             String aux = InetAddress.getLocalHost().getHostName()+"";
-            //aa.name = Integer.parseInt(aux.charAt(1)+"");
-            aa.name = 1;
+            aa.name = Integer.parseInt(aux.charAt(1)+"");
             System.out.println("Mi nombre "+aa.name);
         } catch (UnknownHostException ex) {
             System.out.println("Error al obtener mi nombre... Who am i?: "+ ex);

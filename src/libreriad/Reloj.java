@@ -1,5 +1,11 @@
 package libreriad;
 
+/*
+FALTA
+-Cerrar los sockets cuando se salga del programa
+-Actualizar segunderos en los clientes
+*/
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -43,6 +49,8 @@ public class Reloj {
     /**
      * Crea una instancia de la clase lista para asignar un reloj
      * (Con eso de que Java no permite herencia múltiple xD)
+     * @param jbtn Elemento gráfico ligado al reloj (Por ahora solo Botones)
+     * @param segundero Velocidad del segundero; 1000 = 1 segundo
      */
     public Reloj(JButton jbtn, int segundero){
         //Asignar el valor de retraso del segundero
@@ -56,11 +64,9 @@ public class Reloj {
     }
     
     /**
-     * Recibe un elemento gráfico de tipo botón y le asigna un reloj <br>
+     * Para usar este método primero se debe haber dado un valor a la variable btnr, el cual es el botón con el reloj <br>
      * El texto del botón debe ser inicializado en formato "hh:mm:ss" para funcionar <br>
-     * Para cambiar el tiempo basta solo con modificar el texto del botón o bien con {@link #setTime(java.lang.String, int, int, boolean) }
-     * @param lbr label en donde se mostrará el reloj
-     * @param segundero tiempo de espera entre aumento de segundos (en milisegundos)
+     * Para cambiar el tiempo basta solo con modificar el texto del botón o bien con {@link #setTime(java.lang.String, int)  }
      */
     public void reloj(){
         Thread hilo = new Thread(new Runnable() {
@@ -104,11 +110,19 @@ public class Reloj {
     /**
      * Establecer nuevo segundero al reloj <br>
      * NO actualiza los relojes de los clientes, multicast de java esta hecho basca, así que se debe usar {@link #enviarTime() } para eso.
+     * @param nvoTime Nuevo hora en formato "hh:mm:ss"
      * @param seg velocidad del segundero en milisegundos
      */
     public void setTime(String nvoTime, int seg){
         btnr.setText(nvoTime);
         this.segundero = seg;
+    }
+    /**
+     * Regresa la hora actual del reloj
+     * @return Pues eso mismo xD
+     */
+    public String getTime(){
+        return btnr.getText();
     }
     
     /**
@@ -201,7 +215,7 @@ public class Reloj {
     /**
      * Otorga formato de doble digito sobre un solo número <br>
      * Ósea que si le das un número de un dígito te regresa una cadena con un 0 antes :v
-     * @param h número de un solo digito a formatear
+     * @param c número de un solo digito a formatear
      * @return Cadena formateada con dos digitos
      */
     public static String cadenaDig(String c){

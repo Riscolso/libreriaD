@@ -41,7 +41,6 @@ public class AlgoritmoBerkeley {
      * Tiempo de referencia para discriminar horas (En segundos)
      * 24 minutos
      */
-    
     final int TIMEREF = 60*60;
     public ArrayList<Equipo> equipos = new ArrayList<Equipo>();
     final static int PTOBER = 2070; //El puerto definido para recibir y enviar tramas de este algorimto
@@ -98,7 +97,7 @@ public class AlgoritmoBerkeley {
     /**
      * Envia el valor de ajuste a un equipo especificado <br>
      * La trama se envía a ip con el puerto ptoBer <br>
-     * Debe ser un String con la forma "5" 0 "-3" 
+     * Debe ser un String con la forma "5" o "-3" 
      * @param ip Dirección del equipo al que se va a enviar 
      * @param ajuste Que tanto debe de adelantarse(cantidad) o relentizarse(-cantidad) el reloj del nodo (en segundos)
      * 
@@ -152,29 +151,29 @@ public class AlgoritmoBerkeley {
      * Hilo encargado sincronizar todos los equipo cada "y" cantidad de tiempo  <br>
      * 1.-Envía peticiones de hora a los nodos del sistema (ojo, puede no haber ninguno y por tanto no hace nada)<br>
      * 2.-Una vez que las tenga todas; por todas se refiere a los nodos del arreglo "equipos", calcula la hora contemplando la hora razonable <br>
-     * 4.-Haciendo uso del método {@link #enviaHora(java.lang.String, int)}, envía a un nodo determinado si debe adelantarse o atrasarse x segundos <br>
-     * 5.-Registra en la base de datos usando el método {@link ConexiónBD#registrarHora(int, int, java.util.Map, int, int) } <br>
+     * 4.-Haciendo uso del método {@link #enviaAjuste(java.lang.String, int)}, envía a un nodo determinado si debe adelantarse o relentizarse x segundos <br>
+     * 5.-Registra en la base de datos usando el método {@link ConexiónBD#registrarHora(java.lang.String, java.lang.String, java.util.ArrayList)} <br>
      * registrarHora(hora anterior, hora nueva, Dupla(int, String) con id  y hora de los equipos, tiempo que se adelantó, tiempo que se atrasó) <br>
-     * @see <a href="https://jarroba.com/map-en-java-con-ejemplos"> Maps </a> Para información sobre como usar los mapHash
+     * @see <a href='https://jarroba.com/map-en-java-con-ejemplos'> Maps</a> Para información sobre como usar los mapHash
      * 6.-Actualizar la variable global hora <br>
      * 5.-Esperar "y" segundos y vuelve a empezar <br>
-     * 
-     * Estado: Completo
+     * @param rj Reloj del servidor
+     * Estado: Yape
      */
-    public void berkeley(JButton btn){
+    public void berkeley(Reloj rj){
         Thread t = new Thread(new Runnable(){
                 @Override
                 public void run(){
                     while(true){
                         System.out.println("Inicia el algoritmo");
                         if(equipos.size()!=0){
-                            String aux = btn.getText();//Tiempo "anterior" del algoritmo
+                            String aux = rj.getTime();//Tiempo "anterior" del algoritmo
                             int time = timeASeg(aux); //Tiempo del servidor
                             int t=time, c=1; //C es un contador que indica cuantos equipos se usaron
                             ArrayList<Equipo> es = pedirHoras();
                             for(Equipo e : es){
                                 //int timeE = timeASeg(e.gethEquipo()); //Tiempo del equipo
-                                int timeE = timeASeg(e.gethEquipo())+(e.getLatencia()/2); //Tiempo del equipo
+                                int timeE = timeASeg(e.gethEquipo())+(e.getLatencia()/2); //Tiempo del equipo, se contempla lo que se tardó en llegar
                                 //Discriminar por hora de referencia
                                 if(timeE<time+TIMEREF && timeE>time-TIMEREF){
                                     t+=timeE;
@@ -192,7 +191,9 @@ public class AlgoritmoBerkeley {
                             for(Equipo e : es){
                                 int timeE = timeASeg(e.gethEquipo());
                                 int ajuste = (prom+(e.getLatencia()/2))-timeE;
+                                //Calcular el ajuste de cada máquina
                                 if((ajuste*-1)>=(y/1000)/2) ajuste = -1*(((y/1000)/2)-(e.getLatencia()/2)-1);
+                                //Encapsular
                                 e.setAdelantar(0);
                                 e.setRelentizar(0);
                                 if(ajuste<0){
@@ -201,12 +202,13 @@ public class AlgoritmoBerkeley {
                                 else if(ajuste>0){
                                     e.setAdelantar(ajuste);
                                 }
+                                //Enviar
                                 enviaAjuste(e.getIp(),ajuste);
                             }
                             //Reealentalizar el servidor de tiempo
                             int ajuste = prom-time;
                             if((ajuste*-1)>=(y/1000)/2) ajuste = -1*(((y/1000)/2)-3);
-                            ajusteLocal(ajuste, btn);
+                            ajusteLocal(ajuste,rj);
                             //Registrar en la BD
                             con.registrarHora(aux,segATime(prom), es);
                         }
@@ -225,12 +227,14 @@ public class AlgoritmoBerkeley {
     }
     
     /**
-     * Ajusta el reloj local con base a un tiempo dado
-     * @param a tiempo de ajuste en segundos
-     * @param time hora actual del servidor
+     * Ajusta el reloj local con base a un tiempo dado <br>
+     * El código de aquí y el de {@link #hiloEscuchaEquipos() } debería estar en un solo método, para mandarse a llamar una sola vez<br>
+     * Pero ya no tengo las máquinas para modificar y probar, si quieres modificarlo puedes hacerlo. <br>
+     * @param ajuste tiempo de ajuste en segundos
+     * @param r reloj del servidor
      */
-    public void ajusteLocal(int ajuste, JButton btn){
-        String aux = btn.getText();//Tiempo "anterior" del algoritmo
+    public void ajusteLocal(int ajuste, Reloj r){
+        String aux = r.getTime();//Tiempo "anterior" del algoritmo
         int time = timeASeg(aux); //Tiempo del servidor en segundos
         //String cadT = segATime(time);
         //Relentizar el tiempo
@@ -243,15 +247,16 @@ public class AlgoritmoBerkeley {
             /*OJO AQUI-----------------------------*/
             
             //TimeServer.segundero.setText((1000*2)+"");
-            setTime(aux,1000*2, btn);
+            r.setTime(aux, 1000*2);
             try {
                 Thread.sleep(ajuste*2*1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(AlgoritmoBerkeley.class.getName()).log(Level.SEVERE, null, ex);
             }
-            aux = btn.getText();
+            //Obtener de nuevo el tiempo actual, por que pues cambió y así
+            aux = r.getTime();
             //Regresar al segundero normal
-            setTime(aux,1000, btn);/*OJO AQUI-----------------------------*/
+            r.setTime(aux, 1000);
             
             //TimeServer.lbs.setText(1000+"");
             System.out.println("Toki wa ugoki dasu");
@@ -272,6 +277,7 @@ public class AlgoritmoBerkeley {
             int hor = ti[0];
             //RESPECTO AL SIGUIENTE CÓDIGO, ESTOY SEGURO QUE HAY UNA FORMA MAS ELEGANTE DE HACERLO 
             //PERO ES SEMANA DE EVALUACIONES Y LA NETA TENGO SUEÑO. (H E L P)
+            //lo mismo que en hiloescuchaequipos xD
             if(seg+sa<60){
                 seg+=sa;
                 if(min+ma<60){
@@ -306,24 +312,10 @@ public class AlgoritmoBerkeley {
             //if(ma==0 && sa==0) hor=ha-(24-hor);
             String tim = cadenaDig(hor)+":"+cadenaDig(min)+":"+cadenaDig(seg);
             System.out.println("El nuevo tiempo es "+tim);
-            setTime(tim,1000, btn);
+            r.setTime(tim, 1000);
         }
     }
-    
-    /**
-     * OJO AQUI
-     * @param nvoTime
-     * @param seg
-     * @param b 
-     */
-    public static void setTime(String nvoTime, int seg, JButton b){
-        b.setText(nvoTime);
-        
-        //Nuevo valor del segundero
-        //segundero = seg;
-        System.out.println("Valor segundo: "+seg);
-    }    
-        
+
         
     
     /**
@@ -416,9 +408,6 @@ public class AlgoritmoBerkeley {
         t.start();
     }
     
-    /**
-     * 
-     */
     
     /**
      * Busca y dice si hay un objeto con la cadena n en la lista de equipos
@@ -465,7 +454,7 @@ public class AlgoritmoBerkeley {
      * -Recibe un ajuste con un String de tipo "5" o "-3" <br>
      * -Muestra en consola lo recibido <br>
      * -Reletiza o adelanta la hora (viaja en el tiempo) <br>
-     * 
+     * @param rej Reloj al cual se van a hacer los ajustes.
      * Estado: Completo
      */
     public static void hiloEscuchaHora(Reloj rej){
@@ -483,7 +472,7 @@ public class AlgoritmoBerkeley {
                             if(aux.equals("p")){
                                 //Enviando la hora
                                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(cl.getOutputStream()));
-                                pw.println(MuestraImage.r1.getText());
+                                pw.println(rej.getTime());
                                 pw.flush();
                                 pw.close();
                             }
@@ -493,7 +482,7 @@ public class AlgoritmoBerkeley {
                                 int ajuste = Integer.parseInt(aux);
                                 System.out.println("Se recibió "+ ajuste);
                                 //Obtener el tiempo
-                                String msj = MuestraImage.r1.getText();
+                                String msj = rej.getTime();
                                 //Relentizar el tiempo
                                 if(ajuste<0){
                                     ajuste*=-1;
@@ -526,6 +515,9 @@ public class AlgoritmoBerkeley {
                                     int hor = ti[0];
                                     //RESPECTO AL SIGUIENTE CÓDIGO, ESTOY SEGURO QUE HAY UNA FORMA MAS ELEGANTE DE HACERLO 
                                     //PERO ES SEMANA DE EVALUACIONES Y LA NETA TENGO SUEÑO. (H E L P)
+                                    //PD: Se me acaba de ocurrir que igual y se puede convertir el tiempo del reloj en segundos
+                                    //sumar o restar el ajuste y convertirlo a tiempo otra vez con los métodos de esta clase
+                                    //pero me da paja :v 
                                     if(seg+sa<60){
                                         seg+=sa;
                                         if(min+ma<60){

@@ -32,6 +32,7 @@ public class TimeServer extends javax.swing.JFrame {
     public TimeServer() {
         initComponents();
         this.setTitle("Servidor de Tiempo");
+        
         //Establecer la hora actual
         Date date = new Date();
         DateFormat hourFormat = new SimpleDateFormat("HH:mm:ss");
@@ -48,13 +49,14 @@ public class TimeServer extends javax.swing.JFrame {
         r.reloj();
         
         ab = new AlgoritmoBerkeley();
+        
+        //Ahí el nombre dice qué hace xD
         ab.hiloEscuchaEquipos();
-        ab.berkeley(btnr);
+        
+        //Iniciar el algoritmo de Berkeley
+        ab.berkeley(r);
     }
     
-    public static void setTime(String t){
-        btnr.setText(t);
-    }
 
     
     @SuppressWarnings("unchecked")

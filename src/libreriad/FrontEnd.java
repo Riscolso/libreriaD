@@ -8,8 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -27,7 +25,7 @@ public class FrontEnd {
     /**
      * Trata de conectar a un coordinador y regresa su número
      * @return Número del nodo coordinador.
-     * @throws UnknownHostException 
+     * @throws UnknownHostException No hay ningún nodo disponible
      */
     public int buscarElSujeto() throws UnknownHostException{
         //Va a tratar de conectar a un coordinador, tolerancia de hasta 2 muertos
@@ -43,8 +41,8 @@ public class FrontEnd {
     /**
      * Le dice a los coordinadores secuandarios cuando el primario muere, si hay servidores vivos.
      * @return true si se elegió un nuevo nodo en el sistema, false en caso de que no haya nodos vivos.
-     * @throws UnknownHostException
-     * @throws IOException 
+     * @throws UnknownHostException No hay ningún nodo disponible
+     * @throws IOException Error con Sockets
      */
     public boolean chismoso() throws UnknownHostException, IOException{
         //Tolerancia de 3 nodos 
@@ -106,7 +104,7 @@ public class FrontEnd {
     
     /**
      * Escucha constantemenete cual es el nuevo coordinador. <br> 
-     * Funciona cuando quiere >:v
+     * Funciona cuando quiere :C
      * @throws IOException Error al inicial multicast.
      * @deprecated 
      */
