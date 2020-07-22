@@ -31,3 +31,7 @@
 hs_err_pid*
 
 .bak
+
+#Varios
+*.obj
+manifest.mf
